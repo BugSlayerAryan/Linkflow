@@ -1,0 +1,38 @@
+export const testimonials = [
+  {
+    id: 1,
+    name: "Alex Morgan",
+    role: "Content Creator",
+    avatar: "AM",
+    rating: 5,
+    text: "The fastest and easiest video downloader I’ve ever used. Highly recommended!",
+    gradient: "from-orange-400 via-rose-500 to-fuchsia-600",
+  },
+  {
+    id: 2,
+    name: "Sophia Reynolds",
+    role: "Video Editor",
+    avatar: "SR",
+    rating: 5,
+    text: "Amazing quality downloads, even in 4K. Works perfectly on all platforms.",
+    gradient: "from-fuchsia-400 via-purple-500 to-violet-600",
+  },
+  {
+    id: 3,
+    name: "James Carter",
+    role: "Music Producer",
+    avatar: "JC",
+    rating: 5,
+    text: "MP3 conversion is super fast and the audio quality is excellent.",
+    gradient: "from-blue-400 via-indigo-500 to-violet-600",
+  },
+  {
+    id: 4,
+    name: "Emma Wilson",
+    role: "Social Media Manager",
+    avatar: "EW",
+    rating: 5,
+    text: "Clean interface, quick downloads, and no confusing steps. Exactly what I needed.",
+    gradient: "from-emerald-400 via-cyan-500 to-blue-600",
+  },
+];
