@@ -1043,7 +1043,11 @@ import {
 const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
-const MEDIA_CACHE_VERSION = "v8-audio-safe-preview";
+/**
+ * Same as backend preview cache version.
+ * This avoids old frontend/session cached preview data.
+ */
+const MEDIA_CACHE_VERSION = "v9-preview-stable";
 
 function getDomainLabel(urlValue) {
   try {
@@ -1165,6 +1169,12 @@ function DownloadPreviewPage() {
   const audioOptions = videoInfo?.audio || [];
   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
+  /**
+   * Important:
+   * Never use selectedMedia.url for video preview.
+   * selectedMedia.url is often a raw CDN URL and may not play in browser.
+   * Use backend preview route only.
+   */
   const selectedPreview =
     format === "video" ? videoInfo?.previewUrl || "" : "";
 
@@ -1383,11 +1393,17 @@ function DownloadPreviewPage() {
 
         if (format === "video" && videoRef.current) {
           hasAutoplayedRef.current = true;
+
+          /**
+           * Browsers block autoplay with sound.
+           * So only autoplay muted if autoplay was requested.
+           * User can unmute manually.
+           */
           videoRef.current.muted = true;
           await videoRef.current.play();
         }
       } catch {
-        // Browser can block autoplay with sound.
+        // Browser can block autoplay.
       }
     }, 450);
 
@@ -1492,9 +1508,14 @@ function DownloadPreviewPage() {
         sourceUrl: originalUrl,
         platform: videoInfo?.platform || platform,
         durationText: videoInfo?.durationText || "--",
+
+        /**
+         * Save backend preview URL, not raw CDN URL.
+         */
         previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
         hasAudio: true,
+
         cachedData,
         thumb: videoInfo?.thumb ? getProxyImageUrl(videoInfo.thumb) : "",
       };
@@ -1529,6 +1550,11 @@ function DownloadPreviewPage() {
         {
           type: format,
           title: videoInfo?.title || "linkflow-download",
+
+          /**
+           * Always send originalUrl.
+           * Backend uses yt-dlp to merge video + audio properly.
+           */
           originalUrl,
           platform: videoInfo?.platform || "",
 
@@ -1797,6 +1823,15 @@ function DownloadPreviewPage() {
                   muted={false}
                   onLoadedMetadata={forceVideoSound}
                   onPlay={forceVideoSound}
+                  onError={(event) => {
+                    console.error(
+                      "Preview video failed:",
+                      event.currentTarget.error
+                    );
+                    toast.error(
+                      "Preview failed to play. Try downloading or another quality."
+                    );
+                  }}
                   className="absolute inset-0 h-full w-full object-contain"
                 />
               ) : videoInfo?.thumb ? (
