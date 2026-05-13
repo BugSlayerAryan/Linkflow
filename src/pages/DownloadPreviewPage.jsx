@@ -1,3 +1,6 @@
+
+
+
 // import { useEffect, useMemo, useRef, useState } from "react";
 // import { Link, useSearchParams } from "react-router-dom";
 // import {
@@ -23,6 +26,7 @@
 // import {
 //   downloadDirectMedia,
 //   fetchMediaInfo,
+//   getApiBaseUrl,
 //   getProxyImageUrl,
 // } from "../api/api";
 
@@ -84,6 +88,14 @@
 //   return quality || "Default";
 // }
 
+// function getFixedPreviewUrl(originalUrl) {
+//   if (!originalUrl) return "";
+
+//   return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(
+//     originalUrl
+//   )}`;
+// }
+
 // function DownloadPreviewPage() {
 //   const [searchParams] = useSearchParams();
 
@@ -92,7 +104,6 @@
 //   const platform = useMemo(() => getDomainLabel(url), [url]);
 
 //   const videoRef = useRef(null);
-//   const audioRef = useRef(null);
 //   const standaloneAudioRef = useRef(null);
 //   const hasFetchedRef = useRef(false);
 //   const hasShownErrorRef = useRef(false);
@@ -111,10 +122,14 @@
 //   const audioOptions = videoInfo?.audio || [];
 //   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
+//   /**
+//    * Important:
+//    * Never use selectedMedia.url for video preview.
+//    * selectedMedia.url is often a raw X.com/Twitter CDN URL and may not play in browser.
+//    * Use backend preview route only.
+//    */
 //   const selectedPreview =
-//     format === "video" && selectedMedia?.url
-//       ? selectedMedia.url
-//       : videoInfo?.previewUrl || "";
+//     format === "video" ? videoInfo?.previewUrl || "" : "";
 
 //   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
@@ -134,12 +149,6 @@
 //       videoRef.current.pause();
 //       videoRef.current.currentTime = 0;
 //       videoRef.current.load();
-//     }
-
-//     if (audioRef.current) {
-//       audioRef.current.pause();
-//       audioRef.current.currentTime = 0;
-//       audioRef.current.load();
 //     }
 
 //     if (standaloneAudioRef.current) {
@@ -221,7 +230,14 @@
 //               cached.data?.status === "success" &&
 //               isFresh
 //             ) {
-//               applyVideoData(cached.data);
+//               const originalUrl = cached.data.webpage_url || url;
+
+//               const fixedCachedData = {
+//                 ...cached.data,
+//                 previewUrl: getFixedPreviewUrl(originalUrl),
+//               };
+
+//               applyVideoData(fixedCachedData);
 //               setIsLoading(false);
 //               return;
 //             }
@@ -254,17 +270,22 @@
 //           return;
 //         }
 
+//         const fixedData = {
+//           ...data,
+//           previewUrl: getFixedPreviewUrl(data.webpage_url || url),
+//         };
+
 //         sessionStorage.setItem(
 //           cacheKey,
 //           JSON.stringify({
 //             url,
-//             data,
+//             data: fixedData,
 //             createdAt: Date.now(),
 //           })
 //         );
 
 //         hasShownErrorRef.current = false;
-//         applyVideoData(data);
+//         applyVideoData(fixedData);
 //       } catch (error) {
 //         if (error.name === "AbortError") return;
 
@@ -289,7 +310,7 @@
 //   useEffect(() => {
 //     resetPreviewMedia();
 //     hasAutoplayedRef.current = false;
-//   }, [selectedMedia?.url, selectedMedia?.audioUrl, format]);
+//   }, [videoInfo?.previewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
 
 //   useEffect(() => {
 //     if (
@@ -330,52 +351,6 @@
 //       }
 //     };
 //   }, []);
-
-//   const syncAudioTime = () => {
-//     if (!videoRef.current || !audioRef.current) return;
-
-//     const videoTime = videoRef.current.currentTime;
-//     const audioTime = audioRef.current.currentTime;
-
-//     if (Math.abs(audioTime - videoTime) > 0.25) {
-//       audioRef.current.currentTime = videoTime;
-//     }
-
-//     audioRef.current.volume = videoRef.current.volume;
-//     audioRef.current.muted = videoRef.current.muted;
-//   };
-
-//   const handleVideoPlay = async () => {
-//     if (!audioRef.current || !videoRef.current) return;
-
-//     try {
-//       audioRef.current.currentTime = videoRef.current.currentTime;
-//       audioRef.current.volume = videoRef.current.volume;
-//       audioRef.current.muted = videoRef.current.muted;
-
-//       await audioRef.current.play();
-//     } catch (error) {
-//       console.log("Audio preview sync failed:", error.message);
-//     }
-//   };
-
-//   const handleVideoPause = () => {
-//     if (!audioRef.current) return;
-//     audioRef.current.pause();
-//   };
-
-//   const handleVideoEnded = () => {
-//     if (!audioRef.current) return;
-//     audioRef.current.pause();
-//     audioRef.current.currentTime = 0;
-//   };
-
-//   const handleVolumeChange = () => {
-//     if (!videoRef.current || !audioRef.current) return;
-
-//     audioRef.current.volume = videoRef.current.volume;
-//     audioRef.current.muted = videoRef.current.muted;
-//   };
 
 //   const handleSelectMedia = (option) => {
 //     resetPreviewMedia();
@@ -464,12 +439,15 @@
 //         sourceUrl: originalUrl,
 //         platform: videoInfo?.platform || platform,
 //         durationText: videoInfo?.durationText || "--",
-//         previewUrl: format === "video" ? selectedMedia?.url || "" : "",
-//         audioPreviewUrl:
-//           format === "audio"
-//             ? selectedMedia?.url || ""
-//             : selectedMedia?.audioUrl || "",
-//         hasAudio: Boolean(selectedMedia?.hasAudio),
+
+//         /**
+//          * Save backend preview URL, not raw CDN URL.
+//          * This keeps DownloadPlayerPage working for X.com too.
+//          */
+//         previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
+//         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
+//         hasAudio: true,
+
 //         cachedData,
 //         thumb: videoInfo?.thumb ? getProxyImageUrl(videoInfo.thumb) : "",
 //       };
@@ -757,39 +735,21 @@
 //                   />
 //                 </div>
 //               ) : selectedPreview ? (
-//                 <>
-//                   <video
-//                     ref={videoRef}
-//                     key={`${selectedPreview}-${selectedMedia?.audioUrl || ""}`}
-//                     src={selectedPreview}
-//                     poster={
-//                       videoInfo?.thumb
-//                         ? getProxyImageUrl(videoInfo.thumb)
-//                         : undefined
-//                     }
-//                     controls
-//                     playsInline
-//                     preload="metadata"
-//                     autoPlay={shouldAutoplay}
-//                     onPlay={handleVideoPlay}
-//                     onPause={handleVideoPause}
-//                     onEnded={handleVideoEnded}
-//                     onSeeked={syncAudioTime}
-//                     onTimeUpdate={syncAudioTime}
-//                     onVolumeChange={handleVolumeChange}
-//                     className="absolute inset-0 h-full w-full object-contain"
-//                   />
-
-//                   {selectedMedia?.audioUrl && !selectedMedia?.hasAudio && (
-//                     <audio
-//                       ref={audioRef}
-//                       key={`${selectedMedia.audioUrl}-${selectedMedia.formatId}`}
-//                       src={selectedMedia.audioUrl}
-//                       preload="metadata"
-//                       className="hidden"
-//                     />
-//                   )}
-//                 </>
+//                 <video
+//                   ref={videoRef}
+//                   key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
+//                   src={selectedPreview}
+//                   poster={
+//                     videoInfo?.thumb
+//                       ? getProxyImageUrl(videoInfo.thumb)
+//                       : undefined
+//                   }
+//                   controls
+//                   playsInline
+//                   preload="metadata"
+//                   autoPlay={shouldAutoplay}
+//                   className="absolute inset-0 h-full w-full object-contain"
+//                 />
 //               ) : videoInfo?.thumb ? (
 //                 <img
 //                   src={getProxyImageUrl(videoInfo.thumb)}
@@ -1053,11 +1013,9 @@
 
 // export default DownloadPreviewPage;
 
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
-  BadgeCheck,
   CheckCircle2,
   Download,
   FileMusic,
@@ -1065,6 +1023,7 @@ import {
   Loader2,
   Play,
   ShieldCheck,
+  Volume2,
   X,
   XCircle,
 } from "lucide-react";
@@ -1085,6 +1044,8 @@ import {
 
 const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+
+const MEDIA_CACHE_VERSION = "v7-stable-audio-preview";
 
 function getDomainLabel(urlValue) {
   try {
@@ -1146,7 +1107,38 @@ function getFixedPreviewUrl(originalUrl) {
 
   return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(
     originalUrl
-  )}`;
+  )}&v=${MEDIA_CACHE_VERSION}&t=${Date.now()}`;
+}
+
+function getFriendlyError(error) {
+  const code = error?.cause?.data?.code;
+  const message = error?.cause?.data?.error || error?.message;
+
+  if (code === "YOUTUBE_BLOCKED_ON_SERVER") {
+    return "YouTube blocked this server request. Please try another platform for now.";
+  }
+
+  if (code === "INSTAGRAM_RATE_LIMITED") {
+    return "Instagram is rate-limiting the server. Please wait and try another public reel.";
+  }
+
+  if (code === "INSTAGRAM_LOGIN_REQUIRED") {
+    return "Instagram could not access this content. It may require login or may be unavailable.";
+  }
+
+  if (code === "RATE_LIMITED") {
+    return "This platform is rate-limiting the server. Please wait and try again later.";
+  }
+
+  if (code === "LOGIN_OR_COOKIES_REQUIRED") {
+    return "This video may require login or cookies. Try another public video link.";
+  }
+
+  if (code === "UNSUPPORTED_URL") {
+    return "This website or link format is not supported yet.";
+  }
+
+  return message || "Something went wrong. Please try another video.";
 }
 
 function DownloadPreviewPage() {
@@ -1160,7 +1152,6 @@ function DownloadPreviewPage() {
   const standaloneAudioRef = useRef(null);
   const hasFetchedRef = useRef(false);
   const hasShownErrorRef = useRef(false);
-  const hasAutoplayedRef = useRef(false);
   const downloadAbortRef = useRef(null);
   const processingTimerRef = useRef(null);
 
@@ -1170,6 +1161,8 @@ function DownloadPreviewPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeDownload, setActiveDownload] = useState(null);
+  const [videoLoadError, setVideoLoadError] = useState("");
+  const [userStartedVideo, setUserStartedVideo] = useState(false);
 
   const videoOptions = videoInfo?.video || [];
   const audioOptions = videoInfo?.audio || [];
@@ -1177,9 +1170,8 @@ function DownloadPreviewPage() {
 
   /**
    * Important:
-   * Never use selectedMedia.url for video preview.
-   * selectedMedia.url is often a raw X.com/Twitter CDN URL and may not play in browser.
-   * Use backend preview route only.
+   * Never use raw selectedMedia.url for video preview.
+   * Always use backend /preview route.
    */
   const selectedPreview =
     format === "video" ? videoInfo?.previewUrl || "" : "";
@@ -1198,16 +1190,44 @@ function DownloadPreviewPage() {
   };
 
   const resetPreviewMedia = () => {
+    setVideoLoadError("");
+    setUserStartedVideo(false);
+
     if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-      videoRef.current.load();
+      try {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+        videoRef.current.load();
+      } catch {}
     }
 
     if (standaloneAudioRef.current) {
-      standaloneAudioRef.current.pause();
-      standaloneAudioRef.current.currentTime = 0;
-      standaloneAudioRef.current.load();
+      try {
+        standaloneAudioRef.current.pause();
+        standaloneAudioRef.current.currentTime = 0;
+        standaloneAudioRef.current.load();
+      } catch {}
+    }
+  };
+
+  const forceVideoSound = () => {
+    if (!videoRef.current) return;
+
+    try {
+      videoRef.current.muted = false;
+      videoRef.current.volume = 1;
+    } catch {}
+  };
+
+  const handleVideoPlayClick = async () => {
+    if (!videoRef.current) return;
+
+    try {
+      forceVideoSound();
+      setUserStartedVideo(true);
+      await videoRef.current.play();
+    } catch {
+      toast.info("Tap the video play button to start playback.");
     }
   };
 
@@ -1242,6 +1262,7 @@ function DownloadPreviewPage() {
     const getBestDefaultVideo = (items = []) => {
       return (
         items.find((item) => item.ext === "mp4" && item.hasAudio) ||
+        items.find((item) => item.hasAudio) ||
         items.find((item) => item.ext === "mp4") ||
         items[0] ||
         null
@@ -1270,7 +1291,7 @@ function DownloadPreviewPage() {
           return;
         }
 
-        const cacheKey = `linkflow-media:${url}`;
+        const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${url}`;
         const cachedRaw = sessionStorage.getItem(cacheKey);
 
         if (cachedRaw) {
@@ -1346,7 +1367,7 @@ function DownloadPreviewPage() {
 
         if (!hasShownErrorRef.current) {
           hasShownErrorRef.current = true;
-          toast.error(error.message || "Backend connection failed.");
+          toast.error(getFriendlyError(error));
         }
       } finally {
         setIsLoading(false);
@@ -1362,33 +1383,30 @@ function DownloadPreviewPage() {
 
   useEffect(() => {
     resetPreviewMedia();
-    hasAutoplayedRef.current = false;
   }, [videoInfo?.previewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
 
   useEffect(() => {
-    if (
-      !shouldAutoplay ||
-      isLoading ||
-      !selectedMedia ||
-      hasAutoplayedRef.current
-    ) {
+    if (!shouldAutoplay || isLoading || !selectedMedia) {
       return;
     }
 
     const timer = setTimeout(async () => {
       try {
         if (format === "audio" && standaloneAudioRef.current) {
-          hasAutoplayedRef.current = true;
           await standaloneAudioRef.current.play();
           return;
         }
 
+        /**
+         * Browser often blocks autoplay with sound.
+         * So we only autoplay muted if requested, then user can unmute.
+         */
         if (format === "video" && videoRef.current) {
-          hasAutoplayedRef.current = true;
+          videoRef.current.muted = true;
           await videoRef.current.play();
         }
       } catch {
-        // Browser can block autoplay with sound.
+        // Browser blocked autoplay. User can press play.
       }
     }, 450);
 
@@ -1420,6 +1438,7 @@ function DownloadPreviewPage() {
       const preferred =
         nextFormat === "video"
           ? nextOptions.find((item) => item.ext === "mp4" && item.hasAudio) ||
+            nextOptions.find((item) => item.hasAudio) ||
             nextOptions.find((item) => item.ext === "mp4") ||
             nextOptions[0]
           : nextOptions[0];
@@ -1456,8 +1475,13 @@ function DownloadPreviewPage() {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     try {
-      if (!selectedMedia?.url) {
+      if (!selectedMedia?.url && format !== "video") {
         toast.error("Please select a valid download quality.");
+        return;
+      }
+
+      if (!videoInfo?.webpage_url && !url) {
+        toast.error("Original video URL is missing.");
         return;
       }
 
@@ -1492,15 +1516,9 @@ function DownloadPreviewPage() {
         sourceUrl: originalUrl,
         platform: videoInfo?.platform || platform,
         durationText: videoInfo?.durationText || "--",
-
-        /**
-         * Save backend preview URL, not raw CDN URL.
-         * This keeps DownloadPlayerPage working for X.com too.
-         */
         previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
         hasAudio: true,
-
         cachedData,
         thumb: videoInfo?.thumb ? getProxyImageUrl(videoInfo.thumb) : "",
       };
@@ -1536,23 +1554,27 @@ function DownloadPreviewPage() {
           type: format,
           title: videoInfo?.title || "linkflow-download",
 
+          /**
+           * Always send originalUrl.
+           * Backend will use yt-dlp to select and merge sound properly.
+           */
           originalUrl,
           platform: videoInfo?.platform || "",
 
-          videoUrl: format === "video" ? selectedMedia.url : "",
+          videoUrl: format === "video" ? selectedMedia?.url || "" : "",
           audioUrl:
             format === "audio"
-              ? selectedMedia.url
-              : selectedMedia.audioUrl || "",
+              ? selectedMedia?.url || ""
+              : selectedMedia?.audioUrl || "",
 
-          videoFormatId: format === "video" ? selectedMedia.formatId || "" : "",
+          videoFormatId: format === "video" ? selectedMedia?.formatId || "" : "",
           audioFormatId:
             format === "audio"
-              ? selectedMedia.formatId || ""
-              : selectedMedia.audioFormatId || "",
+              ? selectedMedia?.formatId || ""
+              : selectedMedia?.audioFormatId || "",
 
-          hasAudio: Boolean(selectedMedia.hasAudio),
-          ext: selectedMedia.ext || "",
+          hasAudio: Boolean(selectedMedia?.hasAudio),
+          ext: selectedMedia?.ext || "",
         },
         controller.signal
       );
@@ -1688,7 +1710,7 @@ function DownloadPreviewPage() {
       }
 
       console.error("Download error:", error);
-      toast.error(error.message || "Download failed. Please try again.");
+      toast.error(getFriendlyError(error));
     } finally {
       setIsDownloading(false);
       downloadAbortRef.current = null;
@@ -1782,32 +1804,70 @@ function DownloadPreviewPage() {
                     key={audioPreviewUrl}
                     src={audioPreviewUrl}
                     controls
-                    preload="metadata"
-                    autoPlay={shouldAutoplay}
+                    preload="auto"
+                    autoPlay={false}
                     className="mt-5 w-full max-w-[440px]"
                   />
                 </div>
               ) : selectedPreview ? (
-                <video
-                  ref={videoRef}
-                  key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
-                  src={selectedPreview}
-                  poster={
-                    videoInfo?.thumb
-                      ? getProxyImageUrl(videoInfo.thumb)
-                      : undefined
-                  }
-                  controls
-                  playsInline
-                  preload="metadata"
-                  autoPlay={shouldAutoplay}
-                  className="absolute inset-0 h-full w-full object-contain"
-                />
+                <>
+                  <video
+                    ref={videoRef}
+                    key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
+                    src={selectedPreview}
+                    poster={
+                      videoInfo?.thumb
+                        ? getProxyImageUrl(videoInfo.thumb)
+                        : undefined
+                    }
+                    controls
+                    playsInline
+                    preload="auto"
+                    autoPlay={false}
+                    muted={false}
+                    onLoadedMetadata={forceVideoSound}
+                    onVolumeChange={forceVideoSound}
+                    onPlay={() => {
+                      forceVideoSound();
+                      setUserStartedVideo(true);
+                    }}
+                    onError={() => {
+                      setVideoLoadError(
+                        "Preview could not play. Try downloading or choose another quality."
+                      );
+                    }}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+
+                  {!userStartedVideo && !videoLoadError && (
+                    <button
+                      type="button"
+                      onClick={handleVideoPlayClick}
+                      className="absolute inset-0 z-10 grid place-items-center bg-black/20 text-white transition hover:bg-black/30"
+                    >
+                      <span className="inline-flex items-center gap-2 rounded-full bg-black/65 px-5 py-3 text-sm font-semibold shadow-xl backdrop-blur">
+                        <Volume2 className="h-5 w-5" />
+                        Play with sound
+                      </span>
+                    </button>
+                  )}
+
+                  {videoLoadError && (
+                    <div className="absolute inset-0 z-20 grid place-items-center bg-black/70 px-6 text-center">
+                      <div>
+                        <XCircle className="mx-auto h-10 w-10 text-red-400" />
+                        <p className="mt-3 text-sm font-semibold text-white">
+                          {videoLoadError}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : videoInfo?.thumb ? (
                 <img
                   src={getProxyImageUrl(videoInfo.thumb)}
                   alt={videoInfo?.title || "Video thumbnail"}
-                  className="absolute inset-0 h-full w-full object-contain"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.28),transparent_20%),radial-gradient(circle_at_55%_35%,rgba(34,197,94,0.32),transparent_26%),linear-gradient(135deg,#1e293b,#020617_58%,#0f172a)]" />
@@ -1817,7 +1877,7 @@ function DownloadPreviewPage() {
             <button
               type="button"
               onClick={handleDownload}
-              disabled={isLoading || isDownloading || !selectedMedia?.url}
+              disabled={isLoading || isDownloading || !selectedMedia}
               className="mx-auto mt-5 flex w-full max-w-[430px] cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.26)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isDownloading ? (
@@ -1835,6 +1895,41 @@ function DownloadPreviewPage() {
               <ShieldCheck className="h-[18px] w-[18px] text-emerald-500" />
               Secure and fast download
             </div>
+
+            {activeDownload && (
+              <div className="mx-auto mt-5 max-w-[520px] rounded-3xl border border-[var(--border-soft)] bg-[var(--surface)] p-4 shadow-lg">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[var(--text-heading)]">
+                      {activeDownload.title}
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
+                      {activeDownload.status} · {activeDownload.speed}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCancelDownload}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                    aria-label="Cancel download"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 transition-all duration-500"
+                    style={{ width: `${activeDownload.progress}%` }}
+                  />
+                </div>
+
+                <p className="mt-2 text-right text-xs font-semibold text-[var(--text-muted)]">
+                  {activeDownload.progress}%
+                </p>
+              </div>
+            )}
           </div>
 
           <aside className="min-w-0">
@@ -1972,7 +2067,7 @@ function DownloadPreviewPage() {
                           className={`shrink-0 rounded-lg px-2 py-0.5 text-xs ${
                             isSelected
                               ? "bg-violet-500/12 text-violet-500"
-                              : "text-[var(--text-muted)]"
+                              : "bg-slate-500/10 text-[var(--text-muted)]"
                           }`}
                         >
                           {option.size || "1 MB"}
@@ -1981,85 +2076,15 @@ function DownloadPreviewPage() {
                     );
                   })}
               </div>
-            </div>
 
-            <div className="mt-5 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] p-4">
-              <div className="flex items-start gap-3">
-                <BadgeCheck className="mt-0.5 h-[18px] w-[18px] shrink-0 text-emerald-500" />
-
-                <p className="text-sm leading-6 text-[var(--text-muted)]">
-                  {isLoading
-                    ? "Checking your link and preparing download options."
-                    : "Your link is valid. Choose a format and quality, then start your secure download."}
-                </p>
-              </div>
+              <p className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
+                Some platforms split video and audio. The backend uses the
+                original page link to merge them into one downloadable file.
+              </p>
             </div>
           </aside>
         </div>
       </section>
-
-      {activeDownload && (
-        <div className="fixed bottom-4 left-1/2 z-[80] w-[calc(100%-24px)] max-w-[620px] -translate-x-1/2 sm:bottom-6">
-          <div className="overflow-hidden rounded-[24px] border border-[var(--border-soft)] bg-[var(--surface)] shadow-[0_24px_90px_rgba(2,6,23,0.35)] backdrop-blur-xl">
-            <div className="flex items-start gap-3 p-3.5 sm:p-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-violet-500/12 text-violet-500">
-                {activeDownload.type === "audio" ? (
-                  <FileMusic className="h-5 w-5" />
-                ) : (
-                  <Download className="h-5 w-5" />
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[var(--text-heading)]">
-                      {activeDownload.title}
-                    </p>
-
-                    <p className="mt-1 truncate text-xs text-[var(--text-muted)]">
-                      {activeDownload.quality} · {activeDownload.size}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleCancelDownload}
-                    className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/10 px-2.5 text-[11px] font-semibold text-red-500 hover:bg-red-500/15"
-                    aria-label="Cancel download"
-                  >
-                    <XCircle className="h-3.5 w-3.5" />
-                    Cancel
-                  </button>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between gap-3 text-[11px] font-medium text-[var(--text-muted)]">
-                  <span className="truncate">{activeDownload.status}</span>
-                  <span className="shrink-0">
-                    {Math.round(activeDownload.progress)}%
-                  </span>
-                </div>
-
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--border-soft)]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 transition-all duration-500 ease-out"
-                    style={{
-                      width: `${Math.min(
-                        Math.max(Number(activeDownload.progress || 0), 0),
-                        100
-                      )}%`,
-                    }}
-                  />
-                </div>
-
-                <div className="mt-2 text-right text-[11px] font-medium text-[var(--text-muted)]">
-                  {activeDownload.speed}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
