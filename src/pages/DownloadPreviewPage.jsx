@@ -1,6 +1,3 @@
-
-
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -32,6 +29,12 @@ import {
 
 const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+
+/**
+ * Must match backend preview cache version.
+ * This prevents old broken preview files/session data from being reused.
+ */
+const MEDIA_CACHE_VERSION = "v13-final-h264-aac";
 
 function getDomainLabel(urlValue) {
   try {
@@ -93,7 +96,38 @@ function getFixedPreviewUrl(originalUrl) {
 
   return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(
     originalUrl
-  )}`;
+  )}&v=${MEDIA_CACHE_VERSION}`;
+}
+
+function getFriendlyError(error) {
+  const code = error?.cause?.data?.code;
+  const message = error?.cause?.data?.error || error?.message;
+
+  if (code === "YOUTUBE_BLOCKED_ON_SERVER") {
+    return "YouTube blocked this server request. Please try another platform for now.";
+  }
+
+  if (code === "INSTAGRAM_RATE_LIMITED") {
+    return "Instagram is rate-limiting the server. Please wait and try another public reel.";
+  }
+
+  if (code === "INSTAGRAM_LOGIN_REQUIRED") {
+    return "Instagram could not access this content. It may require login or may be unavailable.";
+  }
+
+  if (code === "RATE_LIMITED") {
+    return "This platform is rate-limiting the server. Please wait and try again later.";
+  }
+
+  if (code === "LOGIN_OR_COOKIES_REQUIRED") {
+    return "This video may require login or cookies. Try another public video link.";
+  }
+
+  if (code === "UNSUPPORTED_URL") {
+    return "This website or link format is not supported yet.";
+  }
+
+  return message || "Something went wrong. Please try another video.";
 }
 
 function DownloadPreviewPage() {
@@ -125,7 +159,7 @@ function DownloadPreviewPage() {
   /**
    * Important:
    * Never use selectedMedia.url for video preview.
-   * selectedMedia.url is often a raw X.com/Twitter CDN URL and may not play in browser.
+   * selectedMedia.url is often a raw CDN URL and may not play in browser.
    * Use backend preview route only.
    */
   const selectedPreview =
@@ -146,16 +180,29 @@ function DownloadPreviewPage() {
 
   const resetPreviewMedia = () => {
     if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-      videoRef.current.load();
+      try {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+        videoRef.current.load();
+      } catch {}
     }
 
     if (standaloneAudioRef.current) {
-      standaloneAudioRef.current.pause();
-      standaloneAudioRef.current.currentTime = 0;
-      standaloneAudioRef.current.load();
+      try {
+        standaloneAudioRef.current.pause();
+        standaloneAudioRef.current.currentTime = 0;
+        standaloneAudioRef.current.load();
+      } catch {}
     }
+  };
+
+  const forceVideoSound = () => {
+    if (!videoRef.current) return;
+
+    try {
+      videoRef.current.muted = false;
+      videoRef.current.volume = 1;
+    } catch {}
   };
 
   const startProcessingTimer = (downloadId) => {
@@ -189,6 +236,7 @@ function DownloadPreviewPage() {
     const getBestDefaultVideo = (items = []) => {
       return (
         items.find((item) => item.ext === "mp4" && item.hasAudio) ||
+        items.find((item) => item.hasAudio) ||
         items.find((item) => item.ext === "mp4") ||
         items[0] ||
         null
@@ -217,7 +265,7 @@ function DownloadPreviewPage() {
           return;
         }
 
-        const cacheKey = `linkflow-media:${url}`;
+        const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${url}`;
         const cachedRaw = sessionStorage.getItem(cacheKey);
 
         if (cachedRaw) {
@@ -293,7 +341,7 @@ function DownloadPreviewPage() {
 
         if (!hasShownErrorRef.current) {
           hasShownErrorRef.current = true;
-          toast.error(error.message || "Backend connection failed.");
+          toast.error(getFriendlyError(error));
         }
       } finally {
         setIsLoading(false);
@@ -332,10 +380,16 @@ function DownloadPreviewPage() {
 
         if (format === "video" && videoRef.current) {
           hasAutoplayedRef.current = true;
+
+          /**
+           * Browsers commonly block autoplay with sound.
+           * Autoplay muted, then user can unmute/play manually.
+           */
+          videoRef.current.muted = true;
           await videoRef.current.play();
         }
       } catch {
-        // Browser can block autoplay with sound.
+        // Browser can block autoplay.
       }
     }, 450);
 
@@ -367,6 +421,7 @@ function DownloadPreviewPage() {
       const preferred =
         nextFormat === "video"
           ? nextOptions.find((item) => item.ext === "mp4" && item.hasAudio) ||
+            nextOptions.find((item) => item.hasAudio) ||
             nextOptions.find((item) => item.ext === "mp4") ||
             nextOptions[0]
           : nextOptions[0];
@@ -442,7 +497,6 @@ function DownloadPreviewPage() {
 
         /**
          * Save backend preview URL, not raw CDN URL.
-         * This keeps DownloadPlayerPage working for X.com too.
          */
         previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
@@ -635,7 +689,7 @@ function DownloadPreviewPage() {
       }
 
       console.error("Download error:", error);
-      toast.error(error.message || "Download failed. Please try again.");
+      toast.error(getFriendlyError(error));
     } finally {
       setIsDownloading(false);
       downloadAbortRef.current = null;
@@ -747,7 +801,19 @@ function DownloadPreviewPage() {
                   controls
                   playsInline
                   preload="metadata"
-                  autoPlay={shouldAutoplay}
+                  autoPlay={false}
+                  muted={false}
+                  onLoadedMetadata={forceVideoSound}
+                  onPlay={forceVideoSound}
+                  onError={(event) => {
+                    console.error(
+                      "Preview video failed:",
+                      event.currentTarget.error
+                    );
+                    toast.error(
+                      "Preview failed to play. Try downloading or another quality."
+                    );
+                  }}
                   className="absolute inset-0 h-full w-full object-contain"
                 />
               ) : videoInfo?.thumb ? (
