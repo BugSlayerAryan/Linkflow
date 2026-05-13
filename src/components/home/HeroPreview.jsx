@@ -1,29 +1,3 @@
-// import heroPreview from "../../assets/images/hero.png";
-
-// function HeroPreview() {
-//   return (
-//     <div className="relative mx-auto w-full max-w-[1040px] translate-y-2 lg:-ml-10 lg:max-w-[1120px] lg:translate-y-5 xl:-ml-16 xl:max-w-[1200px]">
-//       <div className="absolute left-10 top-12 h-88 w-88 rounded-full bg-violet-600/14 blur-[100px]" />
-//       <div className="absolute right-0 top-20 h-88 w-88 rounded-full bg-blue-500/12 blur-[110px]" />
-//       <div className="absolute bottom-6 left-1/2 h-52 w-[480px] -translate-x-1/2 rounded-full bg-fuchsia-500/12 blur-[110px]" />
-
-//       <div className="relative z-10 flex min-h-[480px] items-center justify-center lg:min-h-[610px] xl:min-h-[660px]">
-//         <img
-//           src={heroPreview}
-//           alt="LinkFlow video downloader preview"
-//           className="w-[110%] max-w-none object-contain drop-shadow-[0_34px_110px_rgba(88,28,135,0.36)] transition duration-500 hover:scale-[1.008] sm:w-[108%] lg:w-[118%] xl:w-[124%]"
-//           loading="eager"
-//         />
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default HeroPreview;
-
-
-
-
 import heroPreview from "../../assets/images/hero.png";
 
 function HeroPreview() {
