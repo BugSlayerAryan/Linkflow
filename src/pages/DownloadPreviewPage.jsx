@@ -1023,9 +1023,7 @@ import {
   Loader2,
   Play,
   ShieldCheck,
-  Volume2,
   X,
-  XCircle,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -1045,7 +1043,7 @@ import {
 const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
-const MEDIA_CACHE_VERSION = "v7-stable-audio-preview";
+const MEDIA_CACHE_VERSION = "v8-audio-safe-preview";
 
 function getDomainLabel(urlValue) {
   try {
@@ -1107,7 +1105,7 @@ function getFixedPreviewUrl(originalUrl) {
 
   return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(
     originalUrl
-  )}&v=${MEDIA_CACHE_VERSION}&t=${Date.now()}`;
+  )}&v=${MEDIA_CACHE_VERSION}`;
 }
 
 function getFriendlyError(error) {
@@ -1152,6 +1150,7 @@ function DownloadPreviewPage() {
   const standaloneAudioRef = useRef(null);
   const hasFetchedRef = useRef(false);
   const hasShownErrorRef = useRef(false);
+  const hasAutoplayedRef = useRef(false);
   const downloadAbortRef = useRef(null);
   const processingTimerRef = useRef(null);
 
@@ -1161,18 +1160,11 @@ function DownloadPreviewPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeDownload, setActiveDownload] = useState(null);
-  const [videoLoadError, setVideoLoadError] = useState("");
-  const [userStartedVideo, setUserStartedVideo] = useState(false);
 
   const videoOptions = videoInfo?.video || [];
   const audioOptions = videoInfo?.audio || [];
   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
-  /**
-   * Important:
-   * Never use raw selectedMedia.url for video preview.
-   * Always use backend /preview route.
-   */
   const selectedPreview =
     format === "video" ? videoInfo?.previewUrl || "" : "";
 
@@ -1190,9 +1182,6 @@ function DownloadPreviewPage() {
   };
 
   const resetPreviewMedia = () => {
-    setVideoLoadError("");
-    setUserStartedVideo(false);
-
     if (videoRef.current) {
       try {
         videoRef.current.pause();
@@ -1217,18 +1206,6 @@ function DownloadPreviewPage() {
       videoRef.current.muted = false;
       videoRef.current.volume = 1;
     } catch {}
-  };
-
-  const handleVideoPlayClick = async () => {
-    if (!videoRef.current) return;
-
-    try {
-      forceVideoSound();
-      setUserStartedVideo(true);
-      await videoRef.current.play();
-    } catch {
-      toast.info("Tap the video play button to start playback.");
-    }
   };
 
   const startProcessingTimer = (downloadId) => {
@@ -1383,30 +1360,34 @@ function DownloadPreviewPage() {
 
   useEffect(() => {
     resetPreviewMedia();
+    hasAutoplayedRef.current = false;
   }, [videoInfo?.previewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
 
   useEffect(() => {
-    if (!shouldAutoplay || isLoading || !selectedMedia) {
+    if (
+      !shouldAutoplay ||
+      isLoading ||
+      !selectedMedia ||
+      hasAutoplayedRef.current
+    ) {
       return;
     }
 
     const timer = setTimeout(async () => {
       try {
         if (format === "audio" && standaloneAudioRef.current) {
+          hasAutoplayedRef.current = true;
           await standaloneAudioRef.current.play();
           return;
         }
 
-        /**
-         * Browser often blocks autoplay with sound.
-         * So we only autoplay muted if requested, then user can unmute.
-         */
         if (format === "video" && videoRef.current) {
+          hasAutoplayedRef.current = true;
           videoRef.current.muted = true;
           await videoRef.current.play();
         }
       } catch {
-        // Browser blocked autoplay. User can press play.
+        // Browser can block autoplay with sound.
       }
     }, 450);
 
@@ -1475,13 +1456,8 @@ function DownloadPreviewPage() {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     try {
-      if (!selectedMedia?.url && format !== "video") {
+      if (!selectedMedia) {
         toast.error("Please select a valid download quality.");
-        return;
-      }
-
-      if (!videoInfo?.webpage_url && !url) {
-        toast.error("Original video URL is missing.");
         return;
       }
 
@@ -1553,11 +1529,6 @@ function DownloadPreviewPage() {
         {
           type: format,
           title: videoInfo?.title || "linkflow-download",
-
-          /**
-           * Always send originalUrl.
-           * Backend will use yt-dlp to select and merge sound properly.
-           */
           originalUrl,
           platform: videoInfo?.platform || "",
 
@@ -1804,70 +1775,35 @@ function DownloadPreviewPage() {
                     key={audioPreviewUrl}
                     src={audioPreviewUrl}
                     controls
-                    preload="auto"
-                    autoPlay={false}
+                    preload="metadata"
+                    autoPlay={shouldAutoplay}
                     className="mt-5 w-full max-w-[440px]"
                   />
                 </div>
               ) : selectedPreview ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
-                    src={selectedPreview}
-                    poster={
-                      videoInfo?.thumb
-                        ? getProxyImageUrl(videoInfo.thumb)
-                        : undefined
-                    }
-                    controls
-                    playsInline
-                    preload="auto"
-                    autoPlay={false}
-                    muted={false}
-                    onLoadedMetadata={forceVideoSound}
-                    onVolumeChange={forceVideoSound}
-                    onPlay={() => {
-                      forceVideoSound();
-                      setUserStartedVideo(true);
-                    }}
-                    onError={() => {
-                      setVideoLoadError(
-                        "Preview could not play. Try downloading or choose another quality."
-                      );
-                    }}
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-
-                  {!userStartedVideo && !videoLoadError && (
-                    <button
-                      type="button"
-                      onClick={handleVideoPlayClick}
-                      className="absolute inset-0 z-10 grid place-items-center bg-black/20 text-white transition hover:bg-black/30"
-                    >
-                      <span className="inline-flex items-center gap-2 rounded-full bg-black/65 px-5 py-3 text-sm font-semibold shadow-xl backdrop-blur">
-                        <Volume2 className="h-5 w-5" />
-                        Play with sound
-                      </span>
-                    </button>
-                  )}
-
-                  {videoLoadError && (
-                    <div className="absolute inset-0 z-20 grid place-items-center bg-black/70 px-6 text-center">
-                      <div>
-                        <XCircle className="mx-auto h-10 w-10 text-red-400" />
-                        <p className="mt-3 text-sm font-semibold text-white">
-                          {videoLoadError}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </>
+                <video
+                  ref={videoRef}
+                  key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
+                  src={selectedPreview}
+                  poster={
+                    videoInfo?.thumb
+                      ? getProxyImageUrl(videoInfo.thumb)
+                      : undefined
+                  }
+                  controls
+                  playsInline
+                  preload="metadata"
+                  autoPlay={false}
+                  muted={false}
+                  onLoadedMetadata={forceVideoSound}
+                  onPlay={forceVideoSound}
+                  className="absolute inset-0 h-full w-full object-contain"
+                />
               ) : videoInfo?.thumb ? (
                 <img
                   src={getProxyImageUrl(videoInfo.thumb)}
                   alt={videoInfo?.title || "Video thumbnail"}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain"
                 />
               ) : (
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.28),transparent_20%),radial-gradient(circle_at_55%_35%,rgba(34,197,94,0.32),transparent_26%),linear-gradient(135deg,#1e293b,#020617_58%,#0f172a)]" />
