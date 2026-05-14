@@ -34,7 +34,7 @@ const transitionClass =
  * Must match backend mode.
  * This prevents old broken preview/session data from being reused.
  */
-const MEDIA_CACHE_VERSION = "thumbnail-only-v15";
+const MEDIA_CACHE_VERSION = "server-preview-audio-v16";
 
 function getDomainLabel(urlValue) {
   try {
@@ -163,14 +163,9 @@ function DownloadPreviewPage() {
 
   /**
    * Important:
-   * 1. Use backend preview only if backend provides it.
-   * 2. Otherwise try rawPreviewUrl.
-   * 3. If raw preview also fails, existing UI falls back to thumbnail.
+   * Use backend preview only. rawPreviewUrl can be video-only and cause muted previews.
    */
-  const selectedPreview =
-    format === "video"
-      ? videoInfo?.previewUrl || videoInfo?.rawPreviewUrl || ""
-      : "";
+  const selectedPreview = format === "video" ? videoInfo?.previewUrl || "" : "";
 
   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
@@ -371,7 +366,7 @@ function DownloadPreviewPage() {
   useEffect(() => {
     resetPreviewMedia();
     hasAutoplayedRef.current = false;
-  }, [videoInfo?.previewUrl, videoInfo?.rawPreviewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
+  }, [videoInfo?.previewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
 
   useEffect(() => {
     if (
@@ -508,10 +503,7 @@ function DownloadPreviewPage() {
         platform: videoInfo?.platform || platform,
         durationText: videoInfo?.durationText || "--",
 
-        previewUrl:
-          format === "video"
-            ? videoInfo?.previewUrl || videoInfo?.rawPreviewUrl || ""
-            : "",
+        previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
         hasAudio: true,
 
@@ -831,7 +823,7 @@ function DownloadPreviewPage() {
                     if (!previewToastShownRef.current) {
                       previewToastShownRef.current = true;
                       toast.info(
-                        "Preview is not available for this video, but download may still work."
+                        "Preview with audio is still preparing or unavailable. Download will still work."
                       );
                     }
                   }}
@@ -1024,7 +1016,7 @@ function DownloadPreviewPage() {
                 <p className="text-sm leading-6 text-[var(--text-muted)]">
                   {isLoading
                     ? "Checking your link and preparing download options."
-                    : videoInfo?.previewMode === "thumbnail-only-v15"
+                    : videoInfo?.previewMode === "server-preview-audio-v16"
                     ? "Preview may be unavailable for this platform on this server, but you can still choose a quality and download."
                     : "Your link is valid. Choose a format and quality, then start your secure download."}
                 </p>

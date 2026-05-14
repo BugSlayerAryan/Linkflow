@@ -131,19 +131,7 @@ export async function fetchMediaInfo(videoUrl, signal) {
     signal,
   });
 
-  const data = await parseJsonResponse(response);
-
-  /**
-   * Important:
-   * Do not force previewUrl here.
-   *
-   * Backend may return:
-   * - previewUrl: "" when server preview is disabled
-   * - rawPreviewUrl: direct platform media URL
-   *
-   * DownloadPreviewPage will decide whether to play video or show thumbnail.
-   */
-  return data;
+  return parseJsonResponse(response);
 }
 
 export async function downloadDirectMedia(payload, signal) {

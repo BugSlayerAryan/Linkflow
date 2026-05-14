@@ -23,6 +23,8 @@ const colorTransitionClass =
 const smoothTransitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
+const MEDIA_CACHE_VERSION = "server-preview-audio-v16";
+
 function isValidVideoUrl(value) {
   try {
     const url = new URL(value.trim());
@@ -308,13 +310,18 @@ function HeroSection() {
       setLoadingText("Opening preview page...");
       setProgress(100);
 
-      const cacheKey = `linkflow-media:${trimmedUrl}`;
+      const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${trimmedUrl}`;
+
+      const cachedData = {
+        ...data,
+        previewUrl: data.previewUrl || "",
+      };
 
       sessionStorage.setItem(
         cacheKey,
         JSON.stringify({
           url: trimmedUrl,
-          data,
+          data: cachedData,
           createdAt: Date.now(),
         })
       );

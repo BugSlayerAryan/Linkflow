@@ -50,17 +50,17 @@ function getPlayablePreviewUrl(item) {
     return item.audioPreviewUrl || item.previewUrl || "";
   }
 
-  /**
-   * For video, prefer rebuilding backend preview URL from originalUrl/sourceUrl.
-   * This avoids replaying old raw CDN preview URLs saved in history.
-   */
+  if (item.previewUrl) {
+    return item.previewUrl;
+  }
+
   const originalUrl = item.originalUrl || item.sourceUrl || "";
 
   if (originalUrl) {
     return getPreviewVideoUrl(originalUrl);
   }
 
-  return item.previewUrl || "";
+  return "";
 }
 
 function DownloadPlayerPage() {
@@ -262,6 +262,15 @@ function DownloadPlayerPage() {
                         controls
                         playsInline
                         preload="metadata"
+                        muted={false}
+                        onLoadedMetadata={(event) => {
+                          event.currentTarget.muted = false;
+                          event.currentTarget.volume = 1;
+                        }}
+                        onPlay={(event) => {
+                          event.currentTarget.muted = false;
+                          event.currentTarget.volume = 1;
+                        }}
                         className="absolute inset-0 h-full w-full object-contain"
                       />
                     ) : item.thumb ? (
