@@ -1132,9 +1132,10 @@ const transitionClass =
 /**
  * Must match HeroSection cache version.
  */
-const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v20";
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v21";
 
 const OLD_MEDIA_CACHE_VERSIONS = [
+  "raw-preview-download-audio-v20",
   "raw-preview-download-audio-v19",
   "raw-preview-download-audio-v18",
 ];
@@ -1192,6 +1193,39 @@ function getPrimaryQuality(quality = "") {
   if (normalized.includes("240")) return "240p";
 
   return quality || "Default";
+}
+
+function getQualityRank(option = {}) {
+  const quality = String(option.quality || "").toLowerCase();
+  const directRank = Number(option.qualityRank || option.height || 0);
+
+  if (directRank > 0) return directRank;
+  if (quality.includes("4320") || quality.includes("8k")) return 4320;
+  if (quality.includes("2160") || quality.includes("4k")) return 2160;
+  if (quality.includes("1440") || quality.includes("2k")) return 1440;
+  if (quality.includes("1080") || quality.includes("full hd") || quality.includes("fhd")) return 1080;
+  if (quality.includes("720") || quality === "hd") return 720;
+  if (quality.includes("480") || quality === "sd") return 480;
+  if (quality.includes("360")) return 360;
+  if (quality.includes("240")) return 240;
+  if (quality.includes("144")) return 144;
+
+  return 0;
+}
+
+function sortVideoOptions(items = []) {
+  return [...items].sort((a, b) => {
+    const byQuality = getQualityRank(b) - getQualityRank(a);
+    if (byQuality !== 0) return byQuality;
+
+    if (a.ext === "mp4" && b.ext !== "mp4") return -1;
+    if (a.ext !== "mp4" && b.ext === "mp4") return 1;
+
+    if (a.hasAudio && !b.hasAudio) return -1;
+    if (!a.hasAudio && b.hasAudio) return 1;
+
+    return Number(b.sizeBytes || 0) - Number(a.sizeBytes || 0);
+  });
 }
 
 function getFriendlyError(error) {
@@ -1310,7 +1344,10 @@ function DownloadPreviewPage() {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeDownload, setActiveDownload] = useState(null);
 
-  const videoOptions = videoInfo?.video || [];
+  const videoOptions = useMemo(
+    () => sortVideoOptions(videoInfo?.video || []),
+    [videoInfo?.video]
+  );
   const audioOptions = videoInfo?.audio || [];
   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
@@ -1393,11 +1430,13 @@ function DownloadPreviewPage() {
     const controller = new AbortController();
 
     const getBestDefaultVideo = (items = []) => {
+      const sortedItems = sortVideoOptions(items);
+
       return (
-        items.find((item) => item.ext === "mp4" && item.hasAudio) ||
-        items.find((item) => item.hasAudio) ||
-        items.find((item) => item.ext === "mp4") ||
-        items[0] ||
+        sortedItems.find((item) => item.ext === "mp4" && item.hasAudio) ||
+        sortedItems.find((item) => item.ext === "mp4") ||
+        sortedItems.find((item) => item.hasAudio) ||
+        sortedItems[0] ||
         null
       );
     };
@@ -1549,13 +1588,16 @@ function DownloadPreviewPage() {
     const nextOptions = nextFormat === "video" ? videoOptions : audioOptions;
 
     if (nextOptions.length > 0) {
+      const sortedNextOptions =
+        nextFormat === "video" ? sortVideoOptions(nextOptions) : nextOptions;
+
       const preferred =
         nextFormat === "video"
-          ? nextOptions.find((item) => item.ext === "mp4" && item.hasAudio) ||
-            nextOptions.find((item) => item.hasAudio) ||
-            nextOptions.find((item) => item.ext === "mp4") ||
-            nextOptions[0]
-          : nextOptions[0];
+          ? sortedNextOptions.find((item) => item.ext === "mp4" && item.hasAudio) ||
+            sortedNextOptions.find((item) => item.ext === "mp4") ||
+            sortedNextOptions.find((item) => item.hasAudio) ||
+            sortedNextOptions[0]
+          : sortedNextOptions[0];
 
       setSelectedMedia(preferred);
     } else {
