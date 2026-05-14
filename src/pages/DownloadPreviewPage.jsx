@@ -1097,7 +1097,6 @@
 // }
 
 // export default DownloadPreviewPage;
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -1132,14 +1131,9 @@ const transitionClass =
 /**
  * Must match HeroSection cache version.
  */
-const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v22";
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v23";
 
-const OLD_MEDIA_CACHE_VERSIONS = [
-  "raw-preview-download-audio-v21",
-  "raw-preview-download-audio-v20",
-  "raw-preview-download-audio-v19",
-  "raw-preview-download-audio-v18",
-];
+const OLD_MEDIA_CACHE_VERSIONS = [];
 
 function getDomainLabel(urlValue) {
   try {
@@ -1240,6 +1234,61 @@ function detectAspectRatioFromDimensions(width, height) {
   if (ratio < 0.8) return "portrait";
   if (ratio > 1.2) return "landscape";
   return "square";
+}
+
+function detectAspectRatioFromImage(src) {
+  return new Promise((resolve) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+
+    const image = new Image();
+    let finished = false;
+
+    const done = (value) => {
+      if (finished) return;
+      finished = true;
+      resolve(value);
+    };
+
+    const timer = setTimeout(() => done(null), 1200);
+
+    image.onload = () => {
+      clearTimeout(timer);
+      done(detectAspectRatioFromDimensions(image.naturalWidth, image.naturalHeight));
+    };
+
+    image.onerror = () => {
+      clearTimeout(timer);
+      done(null);
+    };
+
+    image.src = src;
+  });
+}
+
+async function normalizeMediaAspectData(data = {}) {
+  const imageAspectRatio = await detectAspectRatioFromImage(data.thumb || data.thumbnail);
+  const finalAspectRatio = imageAspectRatio || data.aspectRatio || "landscape";
+
+  const normalizeItem = (item = {}) => {
+    if (item.type === "audio" || item.aspectRatio === "audio") return item;
+
+    return {
+      ...item,
+      aspectRatio: item.aspectRatio || finalAspectRatio,
+    };
+  };
+
+  return {
+    ...data,
+    aspectRatio: finalAspectRatio,
+    video: Array.isArray(data.video) ? data.video.map(normalizeItem) : data.video,
+    urls: Array.isArray(data.urls)
+      ? data.urls.map((item) => (item?.type === "video" ? normalizeItem(item) : item))
+      : data.urls,
+  };
 }
 
 function getFriendlyError(error) {
@@ -1343,6 +1392,7 @@ function DownloadPreviewPage() {
   const platform = useMemo(() => getDomainLabel(url), [url]);
 
   const videoRef = useRef(null);
+  const previewAudioRef = useRef(null);
   const standaloneAudioRef = useRef(null);
   const hasFetchedRef = useRef(false);
   const hasShownErrorRef = useRef(false);
@@ -1376,6 +1426,16 @@ function DownloadPreviewPage() {
 
   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
+  const separatePreviewAudioUrl =
+    format === "video"
+      ? videoInfo?.previewHasAudio || videoInfo?.rawPreviewHasAudio
+        ? ""
+        : videoInfo?.previewAudioUrl ||
+          videoInfo?.rawPreviewAudioUrl ||
+          selectedMedia?.audioUrl ||
+          ""
+      : "";
+
   const activeAspectRatio =
     detectedPreviewAspectRatio ||
     selectedMedia?.aspectRatio ||
@@ -1402,6 +1462,14 @@ function DownloadPreviewPage() {
       } catch {}
     }
 
+    if (previewAudioRef.current) {
+      try {
+        previewAudioRef.current.pause();
+        previewAudioRef.current.currentTime = 0;
+        previewAudioRef.current.load();
+      } catch {}
+    }
+
     if (standaloneAudioRef.current) {
       try {
         standaloneAudioRef.current.pause();
@@ -1420,6 +1488,22 @@ function DownloadPreviewPage() {
     } catch {}
   };
 
+  const syncSeparatePreviewAudio = () => {
+    const videoElement = videoRef.current;
+    const audioElement = previewAudioRef.current;
+
+    if (!videoElement || !audioElement || !separatePreviewAudioUrl) return;
+
+    try {
+      if (Math.abs(audioElement.currentTime - videoElement.currentTime) > 0.35) {
+        audioElement.currentTime = videoElement.currentTime;
+      }
+
+      audioElement.volume = videoElement.volume;
+      audioElement.muted = videoElement.muted;
+    } catch {}
+  };
+
   const handlePreviewMetadataLoaded = () => {
     forceVideoSound();
 
@@ -1434,6 +1518,37 @@ function DownloadPreviewPage() {
     if (detected) {
       setDetectedPreviewAspectRatio(detected);
     }
+
+    syncSeparatePreviewAudio();
+  };
+
+  const handlePreviewPlay = async () => {
+    forceVideoSound();
+    syncSeparatePreviewAudio();
+
+    const audioElement = previewAudioRef.current;
+    if (!audioElement || !separatePreviewAudioUrl) return;
+
+    try {
+      await audioElement.play();
+    } catch {}
+  };
+
+  const handlePreviewPause = () => {
+    const audioElement = previewAudioRef.current;
+    if (!audioElement || !separatePreviewAudioUrl) return;
+
+    try {
+      audioElement.pause();
+    } catch {}
+  };
+
+  const handlePreviewSeeked = () => {
+    syncSeparatePreviewAudio();
+  };
+
+  const handlePreviewVolumeChange = () => {
+    syncSeparatePreviewAudio();
   };
 
   const startProcessingTimer = (downloadId) => {
@@ -1476,15 +1591,16 @@ function DownloadPreviewPage() {
       );
     };
 
-    const applyVideoData = (data) => {
-      setVideoInfo(data);
+    const applyVideoData = async (data) => {
+      const normalizedData = await normalizeMediaAspectData(data);
+      setVideoInfo(normalizedData);
 
-      if (Array.isArray(data.video) && data.video.length > 0) {
+      if (Array.isArray(normalizedData.video) && normalizedData.video.length > 0) {
         setFormat("video");
-        setSelectedMedia(getBestDefaultVideo(data.video));
-      } else if (Array.isArray(data.audio) && data.audio.length > 0) {
+        setSelectedMedia(getBestDefaultVideo(normalizedData.video));
+      } else if (Array.isArray(normalizedData.audio) && normalizedData.audio.length > 0) {
         setFormat("audio");
-        setSelectedMedia(data.audio[0]);
+        setSelectedMedia(normalizedData.audio[0]);
       } else {
         setSelectedMedia(null);
       }
@@ -1501,7 +1617,7 @@ function DownloadPreviewPage() {
         const cachedData = readCachedMedia(url);
 
         if (cachedData) {
-          applyVideoData(cachedData);
+          await applyVideoData(cachedData);
           setIsLoading(false);
           return;
         }
@@ -1536,10 +1652,11 @@ function DownloadPreviewPage() {
           rawPreviewUrl: data.rawPreviewUrl || "",
         };
 
-        saveCachedMedia(url, fixedData);
+        const normalizedFixedData = await normalizeMediaAspectData(fixedData);
+        saveCachedMedia(url, normalizedFixedData);
 
         hasShownErrorRef.current = false;
-        applyVideoData(fixedData);
+        await applyVideoData(normalizedFixedData);
       } catch (error) {
         if (error.name === "AbortError") return;
 
@@ -1569,6 +1686,7 @@ function DownloadPreviewPage() {
     videoInfo?.rawPreviewUrl,
     selectedMedia?.url,
     selectedMedia?.audioUrl,
+    separatePreviewAudioUrl,
     format,
   ]);
 
@@ -1997,37 +2115,53 @@ function DownloadPreviewPage() {
                   />
                 </div>
               ) : selectedPreview ? (
-                <video
-                  ref={videoRef}
-                  key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
-                  src={selectedPreview}
-                  poster={
-                    videoInfo?.thumb
-                      ? getProxyImageUrl(videoInfo.thumb)
-                      : undefined
-                  }
-                  controls
-                  playsInline
-                  preload="metadata"
-                  autoPlay={false}
-                  muted={false}
-                  onLoadedMetadata={handlePreviewMetadataLoaded}
-                  onPlay={forceVideoSound}
-                  onError={(event) => {
-                    console.error(
-                      "Preview video failed:",
-                      event.currentTarget.error
-                    );
-
-                    if (!previewToastShownRef.current) {
-                      previewToastShownRef.current = true;
-                      toast.info(
-                        "Preview stream cannot play in the browser. Try another quality or download."
-                      );
+                <>
+                  <video
+                    ref={videoRef}
+                    key={`${selectedPreview}-${selectedMedia?.formatId || ""}`}
+                    src={selectedPreview}
+                    poster={
+                      videoInfo?.thumb
+                        ? getProxyImageUrl(videoInfo.thumb)
+                        : undefined
                     }
-                  }}
-                  className="absolute inset-0 h-full w-full object-contain"
-                />
+                    controls
+                    playsInline
+                    preload="metadata"
+                    autoPlay={false}
+                    muted={false}
+                    onLoadedMetadata={handlePreviewMetadataLoaded}
+                    onPlay={handlePreviewPlay}
+                    onPause={handlePreviewPause}
+                    onSeeked={handlePreviewSeeked}
+                    onTimeUpdate={syncSeparatePreviewAudio}
+                    onVolumeChange={handlePreviewVolumeChange}
+                    onError={(event) => {
+                      console.error(
+                        "Preview video failed:",
+                        event.currentTarget.error
+                      );
+
+                      if (!previewToastShownRef.current) {
+                        previewToastShownRef.current = true;
+                        toast.info(
+                          "Preview stream cannot play in the browser. Try another quality or download."
+                        );
+                      }
+                    }}
+                    className="absolute inset-0 h-full w-full object-contain"
+                  />
+
+                  {separatePreviewAudioUrl && (
+                    <audio
+                      ref={previewAudioRef}
+                      key={separatePreviewAudioUrl}
+                      src={separatePreviewAudioUrl}
+                      preload="metadata"
+                      className="hidden"
+                    />
+                  )}
+                </>
               ) : videoInfo?.thumb ? (
                 <img
                   src={getProxyImageUrl(videoInfo.thumb)}
