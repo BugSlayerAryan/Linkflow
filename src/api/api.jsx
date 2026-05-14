@@ -133,17 +133,17 @@ export async function fetchMediaInfo(videoUrl, signal) {
 
   const data = await parseJsonResponse(response);
 
-  const originalUrl = data.webpage_url || videoUrl;
-
-  return {
-    ...data,
-
-    /**
-     * Always use backend preview route.
-     * This avoids raw CDN preview URLs that can fail for X.com/Twitter.
-     */
-    previewUrl: getPreviewVideoUrl(originalUrl),
-  };
+  /**
+   * Important:
+   * Do not force previewUrl here.
+   *
+   * Backend may return:
+   * - previewUrl: "" when server preview is disabled
+   * - rawPreviewUrl: direct platform media URL
+   *
+   * DownloadPreviewPage will decide whether to play video or show thumbnail.
+   */
+  return data;
 }
 
 export async function downloadDirectMedia(payload, signal) {

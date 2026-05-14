@@ -31,8 +31,8 @@ const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
 /**
- * Must match backend preview cache version.
- * This prevents old broken preview files/session data from being reused.
+ * Must match backend mode.
+ * This prevents old broken preview/session data from being reused.
  */
 const MEDIA_CACHE_VERSION = "thumbnail-only-v15";
 
@@ -95,7 +95,7 @@ function getFixedPreviewUrl(originalUrl) {
   if (!originalUrl) return "";
 
   return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(
-    originalUrl,
+    originalUrl
   )}&v=${MEDIA_CACHE_VERSION}`;
 }
 
@@ -127,6 +127,10 @@ function getFriendlyError(error) {
     return "This website or link format is not supported yet.";
   }
 
+  if (code === "FINAL_MEDIA_PROCESSING_FAILED") {
+    return "Video was found, but server could not convert it properly. Try another quality or another link.";
+  }
+
   return message || "Something went wrong. Please try another video.";
 }
 
@@ -144,6 +148,7 @@ function DownloadPreviewPage() {
   const hasAutoplayedRef = useRef(false);
   const downloadAbortRef = useRef(null);
   const processingTimerRef = useRef(null);
+  const previewToastShownRef = useRef(false);
 
   const [format, setFormat] = useState("video");
   const [videoInfo, setVideoInfo] = useState(null);
@@ -158,11 +163,14 @@ function DownloadPreviewPage() {
 
   /**
    * Important:
-   * Never use selectedMedia.url for video preview.
-   * selectedMedia.url is often a raw CDN URL and may not play in browser.
-   * Use backend preview route only.
+   * 1. Use backend preview only if backend provides it.
+   * 2. Otherwise try rawPreviewUrl.
+   * 3. If raw preview also fails, existing UI falls back to thumbnail.
    */
-  const selectedPreview = format === "video" ? videoInfo?.previewUrl || "" : "";
+  const selectedPreview =
+    format === "video"
+      ? videoInfo?.previewUrl || videoInfo?.rawPreviewUrl || ""
+      : "";
 
   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
@@ -178,6 +186,8 @@ function DownloadPreviewPage() {
   };
 
   const resetPreviewMedia = () => {
+    previewToastShownRef.current = false;
+
     if (videoRef.current) {
       try {
         videoRef.current.pause();
@@ -281,7 +291,9 @@ function DownloadPreviewPage() {
 
               const fixedCachedData = {
                 ...cached.data,
-                previewUrl: getFixedPreviewUrl(originalUrl),
+                previewUrl: cached.data.previewUrl
+                  ? getFixedPreviewUrl(originalUrl)
+                  : "",
               };
 
               applyVideoData(fixedCachedData);
@@ -295,7 +307,7 @@ function DownloadPreviewPage() {
 
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
           toast.error(
-            "Preview data is no longer available. Please download again.",
+            "Preview data is no longer available. Please download again."
           );
           setIsLoading(false);
           return;
@@ -319,7 +331,9 @@ function DownloadPreviewPage() {
 
         const fixedData = {
           ...data,
-          previewUrl: getFixedPreviewUrl(data.webpage_url || url),
+          previewUrl: data.previewUrl
+            ? getFixedPreviewUrl(data.webpage_url || url)
+            : "",
         };
 
         sessionStorage.setItem(
@@ -328,7 +342,7 @@ function DownloadPreviewPage() {
             url,
             data: fixedData,
             createdAt: Date.now(),
-          }),
+          })
         );
 
         hasShownErrorRef.current = false;
@@ -357,12 +371,7 @@ function DownloadPreviewPage() {
   useEffect(() => {
     resetPreviewMedia();
     hasAutoplayedRef.current = false;
-  }, [
-    videoInfo?.previewUrl,
-    selectedMedia?.url,
-    selectedMedia?.audioUrl,
-    format,
-  ]);
+  }, [videoInfo?.previewUrl, videoInfo?.rawPreviewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
 
   useEffect(() => {
     if (
@@ -386,8 +395,8 @@ function DownloadPreviewPage() {
           hasAutoplayedRef.current = true;
 
           /**
-           * Browsers commonly block autoplay with sound.
-           * Autoplay muted, then user can unmute/play manually.
+           * Browser usually blocks autoplay with sound.
+           * Autoplay muted, user can unmute manually.
            */
           videoRef.current.muted = true;
           await videoRef.current.play();
@@ -462,14 +471,14 @@ function DownloadPreviewPage() {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     try {
-      if (!selectedMedia?.url) {
+      if (!selectedMedia) {
         toast.error("Please select a valid download quality.");
         return;
       }
 
       const prettyQuality = getPrettyQuality(
         selectedMedia?.quality,
-        selectedMedia?.ext,
+        selectedMedia?.ext
       );
 
       const originalUrl = videoInfo?.webpage_url || url;
@@ -499,10 +508,10 @@ function DownloadPreviewPage() {
         platform: videoInfo?.platform || platform,
         durationText: videoInfo?.durationText || "--",
 
-        /**
-         * Save backend preview URL, not raw CDN URL.
-         */
-        previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
+        previewUrl:
+          format === "video"
+            ? videoInfo?.previewUrl || videoInfo?.rawPreviewUrl || ""
+            : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
         hasAudio: true,
 
@@ -541,25 +550,29 @@ function DownloadPreviewPage() {
           type: format,
           title: videoInfo?.title || "linkflow-download",
 
+          /**
+           * Always send originalUrl.
+           * Backend uses yt-dlp to merge video + audio properly.
+           */
           originalUrl,
           platform: videoInfo?.platform || "",
 
-          videoUrl: format === "video" ? selectedMedia.url : "",
+          videoUrl: format === "video" ? selectedMedia?.url || "" : "",
           audioUrl:
             format === "audio"
-              ? selectedMedia.url
-              : selectedMedia.audioUrl || "",
+              ? selectedMedia?.url || ""
+              : selectedMedia?.audioUrl || "",
 
-          videoFormatId: format === "video" ? selectedMedia.formatId || "" : "",
+          videoFormatId: format === "video" ? selectedMedia?.formatId || "" : "",
           audioFormatId:
             format === "audio"
-              ? selectedMedia.formatId || ""
-              : selectedMedia.audioFormatId || "",
+              ? selectedMedia?.formatId || ""
+              : selectedMedia?.audioFormatId || "",
 
-          hasAudio: Boolean(selectedMedia.hasAudio),
-          ext: selectedMedia.ext || "",
+          hasAudio: Boolean(selectedMedia?.hasAudio),
+          ext: selectedMedia?.ext || "",
         },
-        controller.signal,
+        controller.signal
       );
 
       stopProcessingTimer();
@@ -576,7 +589,7 @@ function DownloadPreviewPage() {
               speed: "Starting transfer",
               status: "Downloading...",
             }
-          : null,
+          : null
       );
 
       if (!reader) {
@@ -656,7 +669,7 @@ function DownloadPreviewPage() {
               speed: "Completed",
               status: "Finalizing...",
             }
-          : null,
+          : null
       );
 
       const blob = new Blob(chunks);
@@ -759,8 +772,8 @@ function DownloadPreviewPage() {
                 isPortrait
                   ? "h-[min(68svh,660px)] aspect-[9/16]"
                   : isSquare
-                    ? "h-[min(62svh,590px)] aspect-square"
-                    : "w-full max-w-[920px] aspect-video"
+                  ? "h-[min(62svh,590px)] aspect-square"
+                  : "w-full max-w-[920px] aspect-video"
               }`}
             >
               {isLoading ? (
@@ -812,11 +825,15 @@ function DownloadPreviewPage() {
                   onError={(event) => {
                     console.error(
                       "Preview video failed:",
-                      event.currentTarget.error,
+                      event.currentTarget.error
                     );
-                    toast.error(
-                      "Preview failed to play. Try downloading or another quality.",
-                    );
+
+                    if (!previewToastShownRef.current) {
+                      previewToastShownRef.current = true;
+                      toast.info(
+                        "Preview is not available for this video, but download may still work."
+                      );
+                    }
                   }}
                   className="absolute inset-0 h-full w-full object-contain"
                 />
@@ -834,7 +851,7 @@ function DownloadPreviewPage() {
             <button
               type="button"
               onClick={handleDownload}
-              disabled={isLoading || isDownloading || !selectedMedia?.url}
+              disabled={isLoading || isDownloading || !selectedMedia}
               className="mx-auto mt-5 flex w-full max-w-[430px] cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.26)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isDownloading ? (
@@ -959,7 +976,7 @@ function DownloadPreviewPage() {
 
                     const prettyQuality = getPrettyQuality(
                       option.quality,
-                      option.ext,
+                      option.ext
                     );
 
                     return (
@@ -1008,8 +1025,8 @@ function DownloadPreviewPage() {
                   {isLoading
                     ? "Checking your link and preparing download options."
                     : videoInfo?.previewMode === "thumbnail-only-v15"
-                      ? "Preview may be unavailable for this platform on the server, but you can still choose a quality and download."
-                      : "Your link is valid. Choose a format and quality, then start your secure download."}
+                    ? "Preview may be unavailable for this platform on this server, but you can still choose a quality and download."
+                    : "Your link is valid. Choose a format and quality, then start your secure download."}
                 </p>
               </div>
             </div>
@@ -1065,7 +1082,7 @@ function DownloadPreviewPage() {
                     style={{
                       width: `${Math.min(
                         Math.max(Number(activeDownload.progress || 0), 0),
-                        100,
+                        100
                       )}%`,
                     }}
                   />
