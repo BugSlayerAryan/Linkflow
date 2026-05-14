@@ -1098,7 +1098,6 @@
 
 // export default DownloadPreviewPage;
 
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -1134,6 +1133,11 @@ const transitionClass =
  * Must match HeroSection cache version.
  */
 const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v20";
+
+const OLD_MEDIA_CACHE_VERSIONS = [
+  "raw-preview-download-audio-v19",
+  "raw-preview-download-audio-v18",
+];
 
 function getDomainLabel(urlValue) {
   try {
@@ -1229,6 +1233,60 @@ function getFriendlyError(error) {
   return message || "Something went wrong. Please try another video.";
 }
 
+function readCachedMedia(url) {
+  const versions = [MEDIA_CACHE_VERSION, ...OLD_MEDIA_CACHE_VERSIONS];
+
+  for (const version of versions) {
+    const cacheKey = `${version}:linkflow-media:${url}`;
+    const cachedRaw = sessionStorage.getItem(cacheKey);
+
+    if (!cachedRaw) continue;
+
+    try {
+      const cached = JSON.parse(cachedRaw);
+      const isFresh = Date.now() - cached.createdAt < 10 * 60 * 1000;
+
+      if (cached.url === url && cached.data?.status === "success" && isFresh) {
+        const fixedData = {
+          ...cached.data,
+          previewUrl: cached.data.previewUrl || "",
+          rawPreviewUrl: cached.data.rawPreviewUrl || "",
+        };
+
+        const latestCacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${url}`;
+
+        sessionStorage.setItem(
+          latestCacheKey,
+          JSON.stringify({
+            url,
+            data: fixedData,
+            createdAt: Date.now(),
+          })
+        );
+
+        return fixedData;
+      }
+    } catch {
+      sessionStorage.removeItem(cacheKey);
+    }
+  }
+
+  return null;
+}
+
+function saveCachedMedia(url, data) {
+  const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${url}`;
+
+  sessionStorage.setItem(
+    cacheKey,
+    JSON.stringify({
+      url,
+      data,
+      createdAt: Date.now(),
+    })
+  );
+}
+
 function DownloadPreviewPage() {
   const [searchParams] = useSearchParams();
 
@@ -1256,15 +1314,6 @@ function DownloadPreviewPage() {
   const audioOptions = videoInfo?.audio || [];
   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
-  /**
-   * Preview behavior:
-   * - Try previewUrl from backend first.
-   * - Then rawPreviewUrl.
-   * - Then selectedMedia.url.
-   *
-   * Raw preview may be video-only, but that is okay for preview.
-   * Download is handled by backend merge.
-   */
   const selectedPreview =
     format === "video"
       ? videoInfo?.previewUrl ||
@@ -1375,32 +1424,12 @@ function DownloadPreviewPage() {
           return;
         }
 
-        const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${url}`;
-        const cachedRaw = sessionStorage.getItem(cacheKey);
+        const cachedData = readCachedMedia(url);
 
-        if (cachedRaw) {
-          try {
-            const cached = JSON.parse(cachedRaw);
-            const isFresh = Date.now() - cached.createdAt < 10 * 60 * 1000;
-
-            if (
-              cached.url === url &&
-              cached.data?.status === "success" &&
-              isFresh
-            ) {
-              const fixedCachedData = {
-                ...cached.data,
-                previewUrl: cached.data.previewUrl || "",
-                rawPreviewUrl: cached.data.rawPreviewUrl || "",
-              };
-
-              applyVideoData(fixedCachedData);
-              setIsLoading(false);
-              return;
-            }
-          } catch {
-            sessionStorage.removeItem(cacheKey);
-          }
+        if (cachedData) {
+          applyVideoData(cachedData);
+          setIsLoading(false);
+          return;
         }
 
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
@@ -1433,14 +1462,7 @@ function DownloadPreviewPage() {
           rawPreviewUrl: data.rawPreviewUrl || "",
         };
 
-        sessionStorage.setItem(
-          cacheKey,
-          JSON.stringify({
-            url,
-            data: fixedData,
-            createdAt: Date.now(),
-          })
-        );
+        saveCachedMedia(url, fixedData);
 
         hasShownErrorRef.current = false;
         applyVideoData(fixedData);
@@ -1496,17 +1518,10 @@ function DownloadPreviewPage() {
 
         if (format === "video" && videoRef.current) {
           hasAutoplayedRef.current = true;
-
-          /**
-           * Browsers usually block autoplay with sound.
-           * Start muted only for autoplay; user can unmute manually.
-           */
           videoRef.current.muted = true;
           await videoRef.current.play();
         }
-      } catch {
-        // Browser can block autoplay.
-      }
+      } catch {}
     }, 450);
 
     return () => clearTimeout(timer);
