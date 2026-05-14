@@ -513,8 +513,6 @@
 // export default HeroSection;
 
 
-
-
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -541,7 +539,7 @@ const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
 /**
  * Must match DownloadPreviewPage cache version.
  */
-const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v21";
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v22";
 
 const colorTransitionClass =
   "transition-colors duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";

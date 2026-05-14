@@ -1132,9 +1132,10 @@ const transitionClass =
 /**
  * Must match HeroSection cache version.
  */
-const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v21";
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v22";
 
 const OLD_MEDIA_CACHE_VERSIONS = [
+  "raw-preview-download-audio-v21",
   "raw-preview-download-audio-v20",
   "raw-preview-download-audio-v19",
   "raw-preview-download-audio-v18",
@@ -1226,6 +1227,19 @@ function sortVideoOptions(items = []) {
 
     return Number(b.sizeBytes || 0) - Number(a.sizeBytes || 0);
   });
+}
+
+function detectAspectRatioFromDimensions(width, height) {
+  const safeWidth = Number(width || 0);
+  const safeHeight = Number(height || 0);
+
+  if (!safeWidth || !safeHeight) return null;
+
+  const ratio = safeWidth / safeHeight;
+
+  if (ratio < 0.8) return "portrait";
+  if (ratio > 1.2) return "landscape";
+  return "square";
 }
 
 function getFriendlyError(error) {
@@ -1343,6 +1357,7 @@ function DownloadPreviewPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeDownload, setActiveDownload] = useState(null);
+  const [detectedPreviewAspectRatio, setDetectedPreviewAspectRatio] = useState(null);
 
   const videoOptions = useMemo(
     () => sortVideoOptions(videoInfo?.video || []),
@@ -1362,7 +1377,10 @@ function DownloadPreviewPage() {
   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
   const activeAspectRatio =
-    selectedMedia?.aspectRatio || videoInfo?.aspectRatio || "landscape";
+    detectedPreviewAspectRatio ||
+    selectedMedia?.aspectRatio ||
+    videoInfo?.aspectRatio ||
+    "landscape";
 
   const isPortrait = activeAspectRatio === "portrait";
   const isSquare = activeAspectRatio === "square";
@@ -1374,6 +1392,7 @@ function DownloadPreviewPage() {
 
   const resetPreviewMedia = () => {
     previewToastShownRef.current = false;
+    setDetectedPreviewAspectRatio(null);
 
     if (videoRef.current) {
       try {
@@ -1399,6 +1418,22 @@ function DownloadPreviewPage() {
       videoRef.current.muted = false;
       videoRef.current.volume = 1;
     } catch {}
+  };
+
+  const handlePreviewMetadataLoaded = () => {
+    forceVideoSound();
+
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    const detected = detectAspectRatioFromDimensions(
+      videoElement.videoWidth,
+      videoElement.videoHeight
+    );
+
+    if (detected) {
+      setDetectedPreviewAspectRatio(detected);
+    }
   };
 
   const startProcessingTimer = (downloadId) => {
@@ -1976,7 +2011,7 @@ function DownloadPreviewPage() {
                   preload="metadata"
                   autoPlay={false}
                   muted={false}
-                  onLoadedMetadata={forceVideoSound}
+                  onLoadedMetadata={handlePreviewMetadataLoaded}
                   onPlay={forceVideoSound}
                   onError={(event) => {
                     console.error(
