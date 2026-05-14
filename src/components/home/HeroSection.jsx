@@ -15,46 +15,80 @@ import {
 import PillBadge from "../common/PillBadge";
 import BrandLogo from "../common/BrandLogo";
 import HeroPreview from "./HeroPreview";
-import { fetchMediaInfo } from "../../api/api";
+
+const RAW_API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3030";
+
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
+
+/**
+ * Must match DownloadPreviewPage cache version.
+ */
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v18";
 
 const colorTransitionClass =
   "transition-colors duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
-const smoothTransitionClass =
-  "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+const supportedDomains = [
+  "youtube.com",
+  "youtu.be",
+  "instagram.com",
+  "facebook.com",
+  "fb.watch",
+  "twitter.com",
+  "x.com",
+  "tiktok.com",
+  "vimeo.com",
+  "dailymotion.com",
+  "ted.com",
+  "archive.org",
+  "reddit.com",
+];
 
-const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v18";
+const steps = ["Analyze", "Formats", "Preview"];
 
 function isValidVideoUrl(value) {
   try {
     const url = new URL(value.trim());
-    return ["http:", "https:"].includes(url.protocol);
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      return false;
+    }
+
+    const hostname = url.hostname.replace(/^www\./, "").toLowerCase();
+
+    return supportedDomains.some(
+      (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+    );
   } catch {
     return false;
   }
 }
 
-function getFriendlyApiError(error) {
-  const code =
-    error?.cause?.data?.code ||
-    error?.cause?.cause?.data?.code ||
-    error?.cause?.code;
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
-  const message =
-    error?.cause?.data?.error ||
-    error?.cause?.cause?.data?.error ||
-    error?.message;
+function getFriendlyError(error) {
+  const code = error?.cause?.data?.code;
+  const message = error?.cause?.data?.error || error?.message;
 
   if (code === "YOUTUBE_BLOCKED_ON_SERVER") {
     return "YouTube blocked this server request. Please try another platform for now.";
   }
 
-  if (code === "RATE_LIMITED") {
-    return "This platform is rate-limiting the server. Please wait and try again later.";
+  if (code === "INSTAGRAM_RATE_LIMITED") {
+    return "Instagram is rate-limiting the server. Please wait and try another public reel.";
   }
 
-  if (code === "REDDIT_EXTRACT_FAILED") {
-    return "Reddit could not process this post. Try another public Reddit video post.";
+  if (code === "INSTAGRAM_LOGIN_REQUIRED") {
+    return "Instagram could not access this content. It may require login or may be unavailable.";
+  }
+
+  if (code === "RATE_LIMITED") {
+    return "This platform is rate-limiting the server. Please wait and try again later.";
   }
 
   if (code === "LOGIN_OR_COOKIES_REQUIRED") {
@@ -65,85 +99,95 @@ function getFriendlyApiError(error) {
     return "This website or link format is not supported yet.";
   }
 
-  if (code === "MEDIA_EXTRACT_FAILED") {
-    return "Unable to process this media. Please try another public video link.";
-  }
-
-  return message || "Unable to process this link. Please try another video.";
-}
-
-function wait(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+  return message || "Unable to fetch video details. Please try again.";
 }
 
 async function fetchMediaWithRetry(url, onRetry) {
   const maxAttempts = 2;
-  let lastError = null;
+  let lastErrorData = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const data = await fetchMediaInfo(url);
+      const response = await fetch(`${API_BASE_URL}/api/v1/media`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          urls: url,
+        }),
+      });
 
-      if (data?.status === "success") {
-        return data;
+      const data = await response.json().catch(() => null);
+
+      if (response.ok && data?.status === "success") {
+        return {
+          ...data,
+          previewUrl: data.previewUrl || "",
+          rawPreviewUrl: data.rawPreviewUrl || "",
+        };
       }
 
-      lastError = new Error(
-        data?.error || "Unable to fetch video details. Please try again.",
-        {
-          cause: {
-            data,
-          },
-        }
+      lastErrorData = data;
+
+      if (attempt < maxAttempts) {
+        onRetry?.();
+        await wait(900);
+        continue;
+      }
+
+      const error = new Error(
+        data?.error || "Unable to fetch video details. Please try again."
       );
 
-      if (attempt < maxAttempts) {
-        onRetry?.();
-        await wait(900);
-        continue;
-      }
-
-      throw lastError;
-    } catch (error) {
-      lastError = error;
-
-      if (attempt < maxAttempts) {
-        onRetry?.();
-        await wait(900);
-        continue;
-      }
+      error.cause = {
+        status: response.status,
+        data,
+      };
 
       throw error;
+    } catch (error) {
+      if (attempt < maxAttempts) {
+        onRetry?.();
+        await wait(900);
+        continue;
+      }
+
+      if (error?.cause?.data) {
+        throw error;
+      }
+
+      const wrappedError = new Error(
+        lastErrorData?.error ||
+          error?.message ||
+          "Backend connection failed. Please try again."
+      );
+
+      wrappedError.cause = {
+        data: lastErrorData,
+      };
+
+      throw wrappedError;
     }
   }
 
-  throw lastError || new Error("Unable to fetch video details. Please try again.");
+  throw new Error("Unable to fetch video details. Please try again.");
 }
 
 function PreparingOverlay({ progress, loadingText }) {
-  const steps = ["Checking link", "Fetching formats", "Opening preview"];
-
   return (
-    <div className="fixed inset-0 z-[999] grid place-items-center bg-white/70 px-4 backdrop-blur-xl dark:bg-slate-950/72 sm:px-5">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(168,85,247,0.20),transparent_34%),radial-gradient(circle_at_35%_65%,rgba(217,70,239,0.16),transparent_28%)]" />
+    <div className="fixed inset-0 z-[999] grid place-items-center bg-slate-950/60 px-5 backdrop-blur-md">
+      <div className="relative w-full max-w-[460px] overflow-hidden rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-[0_28px_90px_rgba(2,6,23,0.25)] dark:border-white/10 dark:bg-slate-950">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500" />
 
-      <div
-        className={`relative w-full max-w-[520px] overflow-hidden rounded-[32px] border border-slate-200/80 bg-white/88 p-5 shadow-[0_30px_110px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/88 dark:shadow-[0_34px_120px_rgba(0,0,0,0.48)] sm:p-6 ${smoothTransitionClass}`}
-      >
-        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/80 to-transparent" />
-        <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-fuchsia-500/20 blur-[75px]" />
-        <div className="pointer-events-none absolute -bottom-20 left-8 h-48 w-48 rounded-full bg-violet-500/20 blur-[85px]" />
-
-        <div className="relative flex items-start gap-4">
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-violet-500/20 bg-violet-500/12 text-violet-600 shadow-[0_0_34px_rgba(139,92,246,0.18)] dark:text-violet-300">
-            <Loader2 className="h-7 w-7 animate-spin" />
+        <div className="flex items-start gap-4">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-500/12 text-violet-500">
+            <Loader2 className="h-6 w-6 animate-spin" />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-[18px] font-bold tracking-[-0.02em] text-slate-950 dark:text-white">
+              <h3 className="truncate text-base font-bold tracking-[-0.02em] text-slate-950 dark:text-white">
                 {loadingText}
               </h3>
 
@@ -253,23 +297,19 @@ function HeroSection() {
 
   const handlePaste = async () => {
     try {
-      if (!navigator.clipboard?.readText) {
-        toast.info("Clipboard is not available. Please paste the link manually.");
-        return;
-      }
-
       const text = await navigator.clipboard.readText();
 
       if (text) {
-        setVideoUrl(text.trim());
+        setVideoUrl(text);
         setIsPasted(true);
 
         setTimeout(() => {
           setIsPasted(false);
         }, 1600);
       }
-    } catch {
-      toast.info("Clipboard access is blocked. Please paste the link manually.");
+    } catch (error) {
+      toast.error("Clipboard access failed. Please paste the link manually.");
+      console.error("Clipboard access failed:", error);
     }
   };
 
@@ -284,7 +324,7 @@ function HeroSection() {
     }
 
     if (!isValidVideoUrl(trimmedUrl)) {
-      toast.error("Invalid link. Please paste a valid http or https URL.");
+      toast.error("Invalid video link. Please paste a valid public URL.");
       return;
     }
 
@@ -312,26 +352,25 @@ function HeroSection() {
 
       const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${trimmedUrl}`;
 
-      const cachedData = {
-        ...data,
-        previewUrl: data.previewUrl || "",
-      };
-
       sessionStorage.setItem(
         cacheKey,
         JSON.stringify({
           url: trimmedUrl,
-          data: cachedData,
+          data: {
+            ...data,
+            previewUrl: data.previewUrl || "",
+            rawPreviewUrl: data.rawPreviewUrl || "",
+          },
           createdAt: Date.now(),
         })
       );
 
       await wait(350);
 
-      navigate(`/download?url=${encodeURIComponent(trimmedUrl)}`);
+      navigate(`/download?url=${encodeURIComponent(trimmedUrl)}&autoplay=1`);
     } catch (error) {
       console.error("Video prepare error:", error);
-      toast.error(getFriendlyApiError(error));
+      toast.error(getFriendlyError(error));
     } finally {
       resetPreparingState();
     }
@@ -350,14 +389,14 @@ function HeroSection() {
 
       <div className="relative z-10 mx-auto grid max-w-[1440px] items-center gap-8 px-5 py-10 sm:px-8 sm:py-12 lg:min-h-[calc(100vh-72px)] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10 lg:px-14 lg:py-12 xl:gap-12 xl:px-20 2xl:px-24">
         <div className="relative z-10 mx-auto w-full max-w-[680px] text-center lg:mx-0 lg:text-left">
-          <PillBadge>Fast, Secure, Public Links</PillBadge>
+          <PillBadge>Fast, Secure, Unlimited</PillBadge>
 
           <h1
             className={`mt-5 text-[42px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--text-heading)] xs:text-[46px] sm:text-[56px] md:text-[64px] lg:text-[60px] xl:text-[66px] ${colorTransitionClass}`}
           >
             Download Videos
             <br />
-            From Public Links
+            From Any Link
             <br />
             <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-purple-500 bg-clip-text text-transparent">
               Instantly
@@ -367,13 +406,8 @@ function HeroSection() {
           <p
             className={`mx-auto mt-5 max-w-[560px] text-[15px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 lg:mx-0 lg:text-[17px] ${colorTransitionClass}`}
           >
-            Save public videos from X.com, Instagram, Facebook, TikTok, Vimeo,
-            TED, Internet Archive, and selected Reddit posts in MP4 format.
-          </p>
-
-          <p className="mx-auto mt-3 max-w-[560px] text-[12px] leading-6 text-[var(--text-muted)] lg:mx-0">
-            Some platforms may restrict downloads, require login, or rate-limit
-            server requests.
+            Save videos from Instagram, Facebook, X.com, TikTok, Vimeo and more
+            public websites in MP4 or MP3 format. Fast, secure and easy to use.
           </p>
 
           <div className="mx-auto mt-7 max-w-[460px] rounded-[1.35rem] border border-[var(--input-border)] bg-[var(--input-shell-bg)] p-1.5 shadow-[0_18px_55px_var(--shadow-soft)] backdrop-blur-xl transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:mx-0">
@@ -387,22 +421,20 @@ function HeroSection() {
               <input
                 type="url"
                 value={videoUrl}
-                disabled={isPreparing}
                 onChange={(event) => setVideoUrl(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     handleDownload();
                   }
                 }}
-                placeholder="Paste a public video link here..."
-                className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
+                placeholder="Paste your video link here..."
+                className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] sm:text-sm ${colorTransitionClass}`}
               />
 
               <button
                 type="button"
                 onClick={handlePaste}
-                disabled={isPreparing}
-                className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5"
+                className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 sm:h-10 sm:px-3.5"
               >
                 {isPasted ? (
                   <>

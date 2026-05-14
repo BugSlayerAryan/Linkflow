@@ -23,7 +23,6 @@ import {
 import {
   downloadDirectMedia,
   fetchMediaInfo,
-  getApiBaseUrl,
   getProxyImageUrl,
 } from "../api/api";
 
@@ -31,8 +30,7 @@ const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
 /**
- * Must match backend mode.
- * This prevents old broken preview/session data from being reused.
+ * Must match HeroSection cache version.
  */
 const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v18";
 
@@ -91,14 +89,6 @@ function getPrimaryQuality(quality = "") {
   return quality || "Default";
 }
 
-function getFixedPreviewUrl(originalUrl) {
-  if (!originalUrl) return "";
-
-  return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(
-    originalUrl
-  )}&v=${MEDIA_CACHE_VERSION}`;
-}
-
 function getFriendlyError(error) {
   const code = error?.cause?.data?.code;
   const message = error?.cause?.data?.error || error?.message;
@@ -125,6 +115,10 @@ function getFriendlyError(error) {
 
   if (code === "UNSUPPORTED_URL") {
     return "This website or link format is not supported yet.";
+  }
+
+  if (code === "NO_AUDIO_IN_OUTPUT") {
+    return "This video was processed but no audio track was found. Try another quality or another public link.";
   }
 
   if (code === "FINAL_MEDIA_PROCESSING_FAILED") {
@@ -162,10 +156,21 @@ function DownloadPreviewPage() {
   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
   /**
-   * Important:
-   * Use backend preview only. rawPreviewUrl can be video-only and cause muted previews.
+   * Preview behavior:
+   * - Try previewUrl from backend first.
+   * - Then rawPreviewUrl.
+   * - Then selectedMedia.url.
+   *
+   * Raw preview may be video-only, but that is okay for preview.
+   * Download is handled by backend merge.
    */
-  const selectedPreview = format === "video" ? videoInfo?.previewUrl || "" : "";
+  const selectedPreview =
+    format === "video"
+      ? videoInfo?.previewUrl ||
+        videoInfo?.rawPreviewUrl ||
+        selectedMedia?.url ||
+        ""
+      : "";
 
   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
@@ -282,13 +287,10 @@ function DownloadPreviewPage() {
               cached.data?.status === "success" &&
               isFresh
             ) {
-              const originalUrl = cached.data.webpage_url || url;
-
               const fixedCachedData = {
                 ...cached.data,
-                previewUrl: cached.data.previewUrl
-                  ? getFixedPreviewUrl(originalUrl)
-                  : "",
+                previewUrl: cached.data.previewUrl || "",
+                rawPreviewUrl: cached.data.rawPreviewUrl || "",
               };
 
               applyVideoData(fixedCachedData);
@@ -326,9 +328,8 @@ function DownloadPreviewPage() {
 
         const fixedData = {
           ...data,
-          previewUrl: data.previewUrl
-            ? getFixedPreviewUrl(data.webpage_url || url)
-            : "",
+          previewUrl: data.previewUrl || "",
+          rawPreviewUrl: data.rawPreviewUrl || "",
         };
 
         sessionStorage.setItem(
@@ -366,7 +367,13 @@ function DownloadPreviewPage() {
   useEffect(() => {
     resetPreviewMedia();
     hasAutoplayedRef.current = false;
-  }, [videoInfo?.previewUrl, selectedMedia?.url, selectedMedia?.audioUrl, format]);
+  }, [
+    videoInfo?.previewUrl,
+    videoInfo?.rawPreviewUrl,
+    selectedMedia?.url,
+    selectedMedia?.audioUrl,
+    format,
+  ]);
 
   useEffect(() => {
     if (
@@ -390,8 +397,8 @@ function DownloadPreviewPage() {
           hasAutoplayedRef.current = true;
 
           /**
-           * Browser usually blocks autoplay with sound.
-           * Autoplay muted, user can unmute manually.
+           * Browsers usually block autoplay with sound.
+           * Start muted only for autoplay; user can unmute manually.
            */
           videoRef.current.muted = true;
           await videoRef.current.play();
@@ -503,9 +510,12 @@ function DownloadPreviewPage() {
         platform: videoInfo?.platform || platform,
         durationText: videoInfo?.durationText || "--",
 
-        previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
+        previewUrl:
+          format === "video"
+            ? videoInfo?.previewUrl || videoInfo?.rawPreviewUrl || ""
+            : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
-        hasAudio: true,
+        hasAudio: Boolean(selectedMedia?.hasAudio),
 
         cachedData,
         thumb: videoInfo?.thumb ? getProxyImageUrl(videoInfo.thumb) : "",
@@ -542,10 +552,6 @@ function DownloadPreviewPage() {
           type: format,
           title: videoInfo?.title || "linkflow-download",
 
-          /**
-           * Always send originalUrl.
-           * Backend uses yt-dlp to merge video + audio properly.
-           */
           originalUrl,
           platform: videoInfo?.platform || "",
 
@@ -823,7 +829,7 @@ function DownloadPreviewPage() {
                     if (!previewToastShownRef.current) {
                       previewToastShownRef.current = true;
                       toast.info(
-                        "Preview with audio is still preparing or unavailable. Download will still work."
+                        "Preview stream cannot play in the browser. Try another quality or download."
                       );
                     }
                   }}
@@ -1016,8 +1022,6 @@ function DownloadPreviewPage() {
                 <p className="text-sm leading-6 text-[var(--text-muted)]">
                   {isLoading
                     ? "Checking your link and preparing download options."
-                    : videoInfo?.previewMode === "server-preview-audio-v16"
-                    ? "Preview may be unavailable for this platform on this server, but you can still choose a quality and download."
                     : "Your link is valid. Choose a format and quality, then start your secure download."}
                 </p>
               </div>
