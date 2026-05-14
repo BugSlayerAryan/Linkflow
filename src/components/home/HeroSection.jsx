@@ -23,7 +23,7 @@ const colorTransitionClass =
 const smoothTransitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
-const MEDIA_CACHE_VERSION = "server-preview-audio-v16";
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v18";
 
 function isValidVideoUrl(value) {
   try {

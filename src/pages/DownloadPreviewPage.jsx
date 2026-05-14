@@ -34,7 +34,7 @@ const transitionClass =
  * Must match backend mode.
  * This prevents old broken preview/session data from being reused.
  */
-const MEDIA_CACHE_VERSION = "server-preview-audio-v16";
+const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v18";
 
 function getDomainLabel(urlValue) {
   try {
