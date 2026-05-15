@@ -43,21 +43,39 @@ function isHlsUrl(url = "") {
   return String(url || "").toLowerCase().includes(".m3u8");
 }
 
+/**
+ * IMPORTANT:
+ * X.com .m3u8 URLs must NEVER be loaded directly in the browser.
+ * Set VITE_API_URL in your frontend hosting dashboard to your deployed backend URL.
+ * Example: VITE_API_URL=https://your-backend.onrender.com
+ */
 function getApiBaseUrl() {
-  const apiBase = import.meta.env.VITE_API_URL;
+  const envApiUrl = import.meta.env.VITE_API_URL;
 
-  if (!apiBase) {
-    console.error("VITE_API_URL is missing. X.com HLS proxy cannot work.");
+  if (!envApiUrl) {
+    console.error(
+      "VITE_API_URL is missing. X.com HLS proxy cannot work. Set it to your backend URL."
+    );
     return "";
   }
 
-  return String(apiBase).replace(/\/$/, "");
+  const cleaned = String(envApiUrl).replace(/\/$/, "");
+
+  if (cleaned.includes("localhost") && window.location.protocol === "https:") {
+    console.error(
+      "VITE_API_URL points to localhost on a live HTTPS site. Use your deployed backend URL."
+    );
+    return "";
+  }
+
+  return cleaned;
 }
 
 function getHlsProxyUrl(rawUrl = "") {
+  if (!rawUrl) return "";
+
   const apiBase = getApiBaseUrl();
 
-  if (!rawUrl) return "";
   if (!apiBase) return "";
 
   return `${apiBase}/api/v1/hls-proxy?url=${encodeURIComponent(rawUrl)}`;
@@ -483,6 +501,18 @@ function DownloadPreviewPage() {
 
     const proxiedHlsUrl = getHlsProxyUrl(selectedPreview);
 
+    console.log("Original X HLS URL:", selectedPreview);
+    console.log("Using proxied HLS URL:", proxiedHlsUrl);
+
+    /**
+     * Never fall back to direct video.twimg.com.
+     * Direct X/Twitter CDN requests return 403 in browser.
+     */
+    if (!proxiedHlsUrl) {
+      toast.error("Backend API URL missing. Set VITE_API_URL in frontend env.");
+      return;
+    }
+
     try {
       videoElement.pause();
       videoElement.removeAttribute("src");
@@ -497,6 +527,9 @@ function DownloadPreviewPage() {
         enableWorker: true,
         lowLatencyMode: false,
         backBufferLength: 30,
+        xhrSetup(xhr) {
+          xhr.withCredentials = false;
+        },
       });
 
       hls.loadSource(proxiedHlsUrl);
