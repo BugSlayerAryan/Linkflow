@@ -167,7 +167,6 @@
 // }
 
 
-
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://linkflow-server.onrender.com";
 
@@ -186,9 +185,11 @@ export const getPreviewVideoUrl = (url) => {
 async function getErrorMessage(response, fallbackMessage) {
   try {
     const data = await response.json();
-    return data.error || data.details || data.message || fallbackMessage;
+    const error = new Error(data.error || data.details || data.message || fallbackMessage);
+    error.data = data;
+    return error;
   } catch {
-    return fallbackMessage;
+    return new Error(fallbackMessage);
   }
 }
 
@@ -205,9 +206,7 @@ export async function fetchMediaInfo(url, signal) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(
-      data.error || data.details || "Unable to fetch video details."
-    );
+    throw new Error(data.error || data.details || "Unable to fetch video details.");
   }
 
   return data;
@@ -224,7 +223,7 @@ export async function downloadDirectMedia(payload, signal) {
   });
 
   if (!response.ok) {
-    throw new Error(await getErrorMessage(response, "Download failed."));
+    throw await getErrorMessage(response, "Download failed.");
   }
 
   return response;
@@ -241,8 +240,27 @@ export async function downloadFallbackMedia(payload, signal) {
   });
 
   if (!response.ok) {
-    throw new Error(await getErrorMessage(response, "Fallback download failed."));
+    throw await getErrorMessage(response, "Fallback download failed.");
   }
 
   return response;
+}
+
+export async function getFallbackOpenMedia(payload, signal) {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/fallback-open`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    signal,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || data.details || "Could not open fallback media.");
+  }
+
+  return data;
 }

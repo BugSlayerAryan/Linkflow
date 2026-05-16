@@ -4190,8 +4190,6 @@
 
 
 
-
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -4218,6 +4216,7 @@ import {
 import {
   downloadDirectMedia,
   downloadFallbackMedia,
+  getFallbackOpenMedia,
   fetchMediaInfo,
   getApiBaseUrl,
   getProxyImageUrl,
@@ -4439,7 +4438,7 @@ function DownloadPreviewPage() {
         /**
          * v2 cache key prevents old cached responses with empty formats.
          */
-        const cacheKey = `linkflow-media-v4:${url}`;
+        const cacheKey = `linkflow-media-v5:${url}`;
         const cachedRaw = sessionStorage.getItem(cacheKey);
 
         if (cachedRaw) {
@@ -4763,34 +4762,18 @@ function DownloadPreviewPage() {
         ext: selectedMedia.ext || "",
       };
 
-      const shouldUseFallbackRoute =
-        videoInfo?.sourceEngine === "rapidapi" ||
-        selectedMedia?.sourceEngine === "rapidapi" ||
-        String(selectedMedia?.formatId || "").startsWith("rapidapi-");
-
       let response;
 
-      if (shouldUseFallbackRoute) {
-        console.log("Using fallback download route because media source is RapidAPI.");
-
-        response = await downloadFallbackMedia(
-          {
-            type: format,
-            title: videoInfo?.title || "linkflow-download",
-            originalUrl,
-          },
-          controller.signal
+      try {
+        console.log("Trying direct download route with selected video/audio URLs...");
+        response = await downloadDirectMedia(payload, controller.signal);
+      } catch (directError) {
+        console.warn(
+          "Direct download failed, trying fallback download route:",
+          directError.message
         );
-      } else {
-        try {
-          console.log("Trying direct download route...");
-          response = await downloadDirectMedia(payload, controller.signal);
-        } catch (error) {
-          console.warn(
-            "Direct download failed, trying fallback route:",
-            error.message
-          );
 
+        try {
           response = await downloadFallbackMedia(
             {
               type: format,
@@ -4799,6 +4782,51 @@ function DownloadPreviewPage() {
             },
             controller.signal
           );
+        } catch (fallbackError) {
+          console.warn(
+            "Fallback server download failed, trying manual open:",
+            fallbackError.message
+          );
+
+          try {
+            const errorData = fallbackError.data || {};
+            const manualUrl = errorData.openUrl || "";
+
+            if (manualUrl) {
+              window.open(manualUrl, "_blank", "noopener,noreferrer");
+              toast.info(
+                "Server merge failed. Opened the fallback video URL in a new tab."
+              );
+
+              removeActiveDownload(downloadId);
+              setActiveDownload(null);
+              setIsDownloading(false);
+              return;
+            }
+
+            const openData = await getFallbackOpenMedia(
+              { originalUrl },
+              controller.signal
+            );
+
+            if (openData.openUrl) {
+              window.open(openData.openUrl, "_blank", "noopener,noreferrer");
+              toast.info(
+                openData.audioUrl
+                  ? "Server merge failed. Opened video in a new tab. Audio may be separate for YouTube."
+                  : "Server merge failed. Opened video in a new tab."
+              );
+
+              removeActiveDownload(downloadId);
+              setActiveDownload(null);
+              setIsDownloading(false);
+              return;
+            }
+          } catch (openError) {
+            console.warn("Manual open fallback failed:", openError.message);
+          }
+
+          throw fallbackError;
         }
       }
 
