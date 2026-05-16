@@ -167,7 +167,6 @@
 // }
 
 
-
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://linkflow-server.onrender.com";
 
@@ -178,15 +177,13 @@ export const getProxyImageUrl = (url) => {
   return `${getApiBaseUrl()}/api/v1/proxy-image?url=${encodeURIComponent(url)}`;
 };
 
-async function parseErrorResponse(response, fallbackMessage) {
-  let message = fallbackMessage;
-
+async function getErrorMessage(response, fallbackMessage) {
   try {
     const data = await response.json();
-    message = data.error || data.details || data.message || message;
-  } catch {}
-
-  return new Error(message);
+    return data.error || data.details || data.message || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
 }
 
 export async function fetchMediaInfo(url, signal) {
@@ -219,7 +216,7 @@ export async function downloadDirectMedia(payload, signal) {
   });
 
   if (!response.ok) {
-    throw await parseErrorResponse(response, "Download failed.");
+    throw new Error(await getErrorMessage(response, "Download failed."));
   }
 
   return response;
@@ -236,7 +233,7 @@ export async function downloadFallbackMedia(payload, signal) {
   });
 
   if (!response.ok) {
-    throw await parseErrorResponse(response, "Fallback download failed.");
+    throw new Error(await getErrorMessage(response, "Fallback download failed."));
   }
 
   return response;

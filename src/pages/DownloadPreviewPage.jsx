@@ -4192,7 +4192,6 @@
 
 
 
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -4440,7 +4439,7 @@ function DownloadPreviewPage() {
         /**
          * v2 cache key prevents old cached responses with empty formats.
          */
-        const cacheKey = `linkflow-media-v3:${url}`;
+        const cacheKey = `linkflow-media-v4:${url}`;
         const cachedRaw = sessionStorage.getItem(cacheKey);
 
         if (cachedRaw) {
@@ -4784,6 +4783,7 @@ function DownloadPreviewPage() {
         );
       } else {
         try {
+          console.log("Trying direct download route...");
           response = await downloadDirectMedia(payload, controller.signal);
         } catch (error) {
           console.warn(
