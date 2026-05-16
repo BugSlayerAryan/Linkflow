@@ -281,12 +281,12 @@ function DownloadPreviewPage() {
   const availableOptions = format === "video" ? videoOptions : audioOptions;
 
   /**
-   * Use raw preview first for speed. If a fallback API gives separate audio,
-   * syncedAudioUrl below will play it with the video.
+   * Use selectedMedia first. This keeps preview shape matched with selected format.
+   * If rawPreviewUrl is from another format, portrait shorts can look like landscape.
    */
   const selectedPreview =
     format === "video"
-      ? videoInfo?.rawPreviewUrl || selectedMedia?.url || videoInfo?.previewUrl || ""
+      ? selectedMedia?.url || videoInfo?.rawPreviewUrl || videoInfo?.previewUrl || ""
       : "";
 
   const syncedAudioUrl =
