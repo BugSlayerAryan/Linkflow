@@ -166,7 +166,6 @@
 //   return response;
 // }
 
-
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://linkflow-server.onrender.com";
 
@@ -182,15 +181,27 @@ export const getPreviewVideoUrl = (url) => {
   return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(url)}`;
 };
 
-async function getErrorMessage(response, fallbackMessage) {
+async function getErrorPayload(response, fallbackMessage) {
   try {
     const data = await response.json();
-    const error = new Error(data.error || data.details || data.message || fallbackMessage);
-    error.data = data;
-    return error;
+    return {
+      data,
+      message: data.error || data.details || data.message || fallbackMessage,
+    };
   } catch {
-    return new Error(fallbackMessage);
+    return {
+      data: null,
+      message: fallbackMessage,
+    };
   }
+}
+
+async function throwApiError(response, fallbackMessage) {
+  const payload = await getErrorPayload(response, fallbackMessage);
+  const error = new Error(payload.message);
+  error.status = response.status;
+  error.data = payload.data || {};
+  throw error;
 }
 
 export async function fetchMediaInfo(url, signal) {
@@ -223,7 +234,7 @@ export async function downloadDirectMedia(payload, signal) {
   });
 
   if (!response.ok) {
-    throw await getErrorMessage(response, "Download failed.");
+    await throwApiError(response, "Download failed.");
   }
 
   return response;
@@ -240,7 +251,24 @@ export async function downloadFallbackMedia(payload, signal) {
   });
 
   if (!response.ok) {
-    throw await getErrorMessage(response, "Fallback download failed.");
+    await throwApiError(response, "Fallback download failed.");
+  }
+
+  return response;
+}
+
+export async function downloadSingleMedia(payload, signal) {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/download-single`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    signal,
+  });
+
+  if (!response.ok) {
+    await throwApiError(response, "Single media download failed.");
   }
 
   return response;
@@ -256,11 +284,9 @@ export async function getFallbackOpenMedia(payload, signal) {
     signal,
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    throw new Error(data.error || data.details || "Could not open fallback media.");
+    await throwApiError(response, "Could not open fallback media.");
   }
 
-  return data;
+  return response.json();
 }

@@ -26,6 +26,7 @@ import {
 import {
   downloadDirectMedia,
   downloadFallbackMedia,
+  downloadSingleMedia,
   getFallbackOpenMedia,
   fetchMediaInfo,
   getApiBaseUrl,
@@ -138,6 +139,36 @@ function getPrimaryQuality(quality = "", media = {}) {
   if (normalized.includes("sd")) return "SD";
 
   return quality || "Default";
+}
+
+
+async function saveResponseToFile(response, fileName) {
+  const blob = await response.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+
+  const anchor = document.createElement("a");
+  anchor.href = blobUrl;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  window.URL.revokeObjectURL(blobUrl);
+}
+
+function getSplitDownloadFileName(title, type, ext = "") {
+  const safeTitle = String(title || "linkflow-download")
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
+
+  const extension =
+    ext || (type === "audio" ? "mp3" : "mp4");
+
+  return `${safeTitle || "linkflow-download"}-${
+    type === "audio" ? "audio" : "video-only"
+  }.${extension}`;
 }
 
 function getPrettyQuality(quality = "", ext = "", media = {}) {
@@ -725,26 +756,94 @@ function DownloadPreviewPage() {
           );
         } catch (fallbackError) {
           console.warn(
-            "Fallback server download failed, trying manual open:",
+            "Fallback server merge failed, trying single-file fallback:",
             fallbackError.message
           );
 
-          try {
-            const errorData = fallbackError.data || {};
-            const manualUrl = errorData.openUrl || "";
+          const errorData = fallbackError.data || {};
+          const singleVideoUrl =
+            errorData.singleVideoUrl ||
+            errorData.openUrl ||
+            selectedMedia?.url ||
+            "";
+          const singleAudioUrl =
+            errorData.singleAudioUrl ||
+            errorData.audioUrl ||
+            selectedMedia?.audioUrl ||
+            "";
 
-            if (manualUrl) {
-              window.open(manualUrl, "_blank", "noopener,noreferrer");
+          /**
+           * Last reliable fallback:
+           * if server cannot merge video+audio, download the selected stream alone.
+           * For separate-stream platforms, also download audio separately when available.
+           */
+          if (format === "video" && singleVideoUrl) {
+            try {
               toast.info(
-                "Server merge failed. Opened the fallback video URL in a new tab."
+                singleAudioUrl
+                  ? "Full video merge failed. Downloading video-only and audio separately."
+                  : "Full video merge failed. Downloading video-only."
               );
 
+              const videoOnlyResponse = await downloadSingleMedia(
+                {
+                  url: singleVideoUrl,
+                  title: videoInfo?.title || "linkflow-download",
+                  type: "video",
+                  ext: selectedMedia?.ext || "mp4",
+                },
+                controller.signal
+              );
+
+              await saveResponseToFile(
+                videoOnlyResponse,
+                getSplitDownloadFileName(
+                  videoInfo?.title,
+                  "video",
+                  selectedMedia?.ext || "mp4"
+                )
+              );
+
+              if (singleAudioUrl) {
+                const audioOnlyResponse = await downloadSingleMedia(
+                  {
+                    url: singleAudioUrl,
+                    title: videoInfo?.title || "linkflow-download",
+                    type: "audio",
+                    ext: "m4a",
+                  },
+                  controller.signal
+                );
+
+                await saveResponseToFile(
+                  audioOnlyResponse,
+                  getSplitDownloadFileName(videoInfo?.title, "audio", "m4a")
+                );
+              }
+
               removeActiveDownload(downloadId);
+              addRecentDownload({
+                ...downloadMeta,
+                progress: 100,
+                status: singleAudioUrl
+                  ? "Downloaded video/audio separately"
+                  : "Downloaded video-only",
+              });
+
               setActiveDownload(null);
               setIsDownloading(false);
+              toast.success(
+                singleAudioUrl
+                  ? "Downloaded video-only and audio separately."
+                  : "Downloaded video-only."
+              );
               return;
+            } catch (singleError) {
+              console.warn("Single-file fallback failed:", singleError.message);
             }
+          }
 
+          try {
             const openData = await getFallbackOpenMedia(
               { originalUrl },
               controller.signal
@@ -754,7 +853,7 @@ function DownloadPreviewPage() {
               window.open(openData.openUrl, "_blank", "noopener,noreferrer");
               toast.info(
                 openData.audioUrl
-                  ? "Server merge failed. Opened video in a new tab. Audio may be separate for YouTube."
+                  ? "Server merge failed. Opened video in a new tab. Audio may be separate."
                   : "Server merge failed. Opened video in a new tab."
               );
 
