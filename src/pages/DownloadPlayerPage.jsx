@@ -17,7 +17,6 @@ import {
   getRecentDownloads,
 } from "../utils/downloadHistory";
 import { getPreviewVideoUrl } from "../api/api";
-import { getDownloadBlob } from "../utils/downloadBlobStore";
 
 function getDimensionsFromQualityText(quality = "") {
   const match = String(quality || "").match(/(\d{3,4})\s*[x×]\s*(\d{3,4})/i);
@@ -88,7 +87,7 @@ function getNaturalKindFromVideo(video) {
   return "landscape";
 }
 
-function getPlayableSources(item, localBlobUrl = "") {
+function getPlayableSources(item) {
   if (!item) {
     return {
       videoUrl: "",
@@ -107,42 +106,40 @@ function getPlayableSources(item, localBlobUrl = "") {
       videoUrl: "",
       audioUrl: "",
       audioOnlyUrl:
-        localBlobUrl ||
         item.audioPreviewUrl ||
         item.previewUrl ||
         cachedData.rawPreviewAudioUrl ||
         cachedData.audio?.[0]?.url ||
         "",
       poster: item.thumb || cachedData.thumb || "",
-      sourceNote: localBlobUrl ? "Local browser cache" : "Saved audio preview",
+      sourceNote: "Saved audio preview",
     };
   }
 
   /**
-   * Best source is the locally cached downloaded blob.
-   * This keeps Recent Downloads playable even after CDN preview URLs expire.
+   * Recent downloads are only metadata, not the user's local downloaded file.
+   * So the player must use saved preview/cached media URLs first.
+   * If those expire, fallback to backend preview from originalUrl.
    */
   const videoUrl =
-    localBlobUrl ||
     item.previewUrl ||
     cachedData.rawPreviewUrl ||
     cachedData.video?.[0]?.url ||
     (originalUrl ? getPreviewVideoUrl(originalUrl) : "");
 
-  const audioUrl = localBlobUrl
-    ? ""
-    : item.audioPreviewUrl ||
-      cachedData.rawPreviewAudioUrl ||
-      cachedData.video?.find((entry) => entry?.url === videoUrl)?.audioUrl ||
-      cachedData.video?.[0]?.audioUrl ||
-      "";
+  const audioUrl =
+    item.audioPreviewUrl ||
+    cachedData.rawPreviewAudioUrl ||
+    cachedData.video?.find((entry) => entry?.url === videoUrl)?.audioUrl ||
+    cachedData.video?.[0]?.audioUrl ||
+    "";
 
   return {
     videoUrl,
     audioUrl,
     audioOnlyUrl: "",
     poster: item.thumb || cachedData.thumb || "",
-    sourceNote: localBlobUrl ? "Local browser cache" : "Saved preview",
+    sourceNote: videoUrl === item.previewUrl ? "Saved preview" : "Cached media preview",
   };
 }
 
@@ -158,14 +155,9 @@ function DownloadPlayerPage() {
   const [isReady, setIsReady] = useState(false);
   const [naturalKind, setNaturalKind] = useState("");
   const [videoFailed, setVideoFailed] = useState(false);
-  const [localBlobUrl, setLocalBlobUrl] = useState("");
-  const [localCacheStatus, setLocalCacheStatus] = useState("idle");
 
   const mediaKind = useMemo(() => getMediaKind(item), [item]);
-  const playableSources = useMemo(
-    () => getPlayableSources(item, localBlobUrl),
-    [item, localBlobUrl]
-  );
+  const playableSources = useMemo(() => getPlayableSources(item), [item]);
   const playerKind = naturalKind || mediaKind;
 
   useEffect(() => {
@@ -193,51 +185,6 @@ function DownloadPlayerPage() {
     setItem(savedItem || null);
     setIsReady(true);
   }, [id]);
-
-  useEffect(() => {
-    let revokeUrl = "";
-    let cancelled = false;
-
-    const loadLocalBlob = async () => {
-      setLocalBlobUrl("");
-      setLocalCacheStatus("idle");
-
-      if (!item?.localBlobId) return;
-
-      try {
-        setLocalCacheStatus("loading");
-
-        const record = await getDownloadBlob(item.localBlobId);
-
-        if (cancelled) return;
-
-        if (record?.blob) {
-          const objectUrl = URL.createObjectURL(record.blob);
-          revokeUrl = objectUrl;
-          setLocalBlobUrl(objectUrl);
-          setLocalCacheStatus("ready");
-        } else {
-          setLocalCacheStatus("missing");
-        }
-      } catch (error) {
-        console.warn("Local download cache load failed:", error.message);
-
-        if (!cancelled) {
-          setLocalCacheStatus("missing");
-        }
-      }
-    };
-
-    loadLocalBlob();
-
-    return () => {
-      cancelled = true;
-
-      if (revokeUrl) {
-        URL.revokeObjectURL(revokeUrl);
-      }
-    };
-  }, [item?.localBlobId]);
 
   useEffect(() => {
     setNaturalKind("");
@@ -574,9 +521,9 @@ function DownloadPlayerPage() {
                     <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
 
                     <p className="text-sm leading-6 text-[var(--text-muted)]">
-                      {localCacheStatus === "ready"
-                        ? "Playing from local browser cache. This keeps recent downloads playable even if the original CDN link expires."
-                        : "Recent downloads store preview metadata. Smaller completed files can also be saved in local browser cache for playback."}
+                      Recent downloads store preview metadata, not your local
+                      file. If a platform link expires, reload from the original
+                      source.
                     </p>
                   </div>
 
