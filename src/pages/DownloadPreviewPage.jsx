@@ -22,6 +22,10 @@ import {
   removeActiveDownload,
   updateActiveDownload,
 } from "../utils/downloadHistory";
+import {
+  canCacheDownloadBlob,
+  saveDownloadBlob,
+} from "../utils/downloadBlobStore";
 
 import {
   downloadDirectMedia,
@@ -142,8 +146,7 @@ function getPrimaryQuality(quality = "", media = {}) {
 }
 
 
-async function saveResponseToFile(response, fileName) {
-  const blob = await response.blob();
+function saveBlobToFile(blob, fileName) {
   const blobUrl = window.URL.createObjectURL(blob);
 
   const anchor = document.createElement("a");
@@ -154,6 +157,12 @@ async function saveResponseToFile(response, fileName) {
   anchor.remove();
 
   window.URL.revokeObjectURL(blobUrl);
+}
+
+async function saveResponseToFile(response, fileName) {
+  const blob = await response.blob();
+  saveBlobToFile(blob, fileName);
+  return blob;
 }
 
 function getSplitDownloadFileName(title, type, ext = "") {
@@ -169,6 +178,32 @@ function getSplitDownloadFileName(title, type, ext = "") {
   return `${safeTitle || "linkflow-download"}-${
     type === "audio" ? "audio" : "video-only"
   }.${extension}`;
+}
+
+
+async function trySavePlayableDownloadCache({
+  downloadId,
+  blob,
+  fileName,
+  downloadMeta,
+}) {
+  try {
+    if (!canCacheDownloadBlob(blob)) {
+      return null;
+    }
+
+    return await saveDownloadBlob({
+      id: downloadId,
+      blob,
+      fileName,
+      type: downloadMeta?.type || "video",
+      aspectRatio: downloadMeta?.aspectRatio || "landscape",
+      title: downloadMeta?.title || "linkflow-download",
+    });
+  } catch (error) {
+    console.warn("Playable local cache save failed:", error.message);
+    return null;
+  }
 }
 
 function getPrettyQuality(quality = "", ext = "", media = {}) {
@@ -683,8 +718,14 @@ function DownloadPreviewPage() {
          */
         previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
-        hasAudio: hasConfirmedAudio(selectedMedia),
+        hasAudio: selectedMedia?.hasAudio === true || hasConfirmedAudio(selectedMedia),
 
+        localBlobId: "",
+        localBlobMimeType: "",
+        localBlobSize: 0,
+        localCacheAvailable: false,
+        width: selectedMedia?.width || null,
+        height: selectedMedia?.height || null,
         cachedData,
         thumb: videoInfo?.thumb ? getProxyImageUrl(videoInfo.thumb) : "",
       };
@@ -730,7 +771,7 @@ function DownloadPreviewPage() {
           format === "audio"
             ? selectedMedia.formatId || ""
             : selectedMedia.audioFormatId || "",
-        hasAudio: hasConfirmedAudio(selectedMedia),
+        hasAudio: selectedMedia?.hasAudio === true || hasConfirmedAudio(selectedMedia),
         ext: selectedMedia.ext || "",
       };
 
@@ -795,14 +836,23 @@ function DownloadPreviewPage() {
                 controller.signal
               );
 
-              await saveResponseToFile(
-                videoOnlyResponse,
-                getSplitDownloadFileName(
-                  videoInfo?.title,
-                  "video",
-                  selectedMedia?.ext || "mp4"
-                )
+              const videoOnlyFileName = getSplitDownloadFileName(
+                videoInfo?.title,
+                "video",
+                selectedMedia?.ext || "mp4"
               );
+
+              const videoOnlyBlob = await saveResponseToFile(
+                videoOnlyResponse,
+                videoOnlyFileName
+              );
+
+              const localBlobInfo = await trySavePlayableDownloadCache({
+                downloadId,
+                blob: videoOnlyBlob,
+                fileName: videoOnlyFileName,
+                downloadMeta,
+              });
 
               if (singleAudioUrl) {
                 const audioOnlyResponse = await downloadSingleMedia(
@@ -824,6 +874,10 @@ function DownloadPreviewPage() {
               removeActiveDownload(downloadId);
               addRecentDownload({
                 ...downloadMeta,
+                localBlobId: localBlobInfo?.id || "",
+                localBlobMimeType: localBlobInfo?.mimeType || "",
+                localBlobSize: localBlobInfo?.size || 0,
+                localCacheAvailable: Boolean(localBlobInfo?.id),
                 progress: 100,
                 status: singleAudioUrl
                   ? "Downloaded video/audio separately"
@@ -892,25 +946,32 @@ function DownloadPreviewPage() {
 
       if (!reader) {
         const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
+        const fileName = getDownloadFileName(videoInfo?.title, format);
+        saveBlobToFile(blob, fileName);
 
-        const anchor = document.createElement("a");
-        anchor.href = blobUrl;
-        anchor.download = getDownloadFileName(videoInfo?.title, format);
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-
-        window.URL.revokeObjectURL(blobUrl);
+        const localBlobInfo = await trySavePlayableDownloadCache({
+          downloadId,
+          blob,
+          fileName,
+          downloadMeta,
+        });
 
         removeActiveDownload(downloadId);
         addRecentDownload({
           ...downloadMeta,
+          localBlobId: localBlobInfo?.id || "",
+          localBlobMimeType: localBlobInfo?.mimeType || "",
+          localBlobSize: localBlobInfo?.size || 0,
+          localCacheAvailable: Boolean(localBlobInfo?.id),
           progress: 100,
         });
 
         setActiveDownload(null);
-        toast.success("Download completed.");
+        toast.success(
+          localBlobInfo?.id
+            ? "Download completed and saved for local playback."
+            : "Download completed."
+        );
         return;
       }
 
@@ -970,21 +1031,28 @@ function DownloadPreviewPage() {
           : null
       );
 
-      const blob = new Blob(chunks);
-      const blobUrl = window.URL.createObjectURL(blob);
+      const responseContentType =
+        response.headers.get("content-type") ||
+        (format === "audio" ? "audio/mpeg" : "video/mp4");
 
-      const anchor = document.createElement("a");
-      anchor.href = blobUrl;
-      anchor.download = getDownloadFileName(videoInfo?.title, format);
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
+      const blob = new Blob(chunks, { type: responseContentType });
+      const fileName = getDownloadFileName(videoInfo?.title, format);
+      saveBlobToFile(blob, fileName);
 
-      window.URL.revokeObjectURL(blobUrl);
+      const localBlobInfo = await trySavePlayableDownloadCache({
+        downloadId,
+        blob,
+        fileName,
+        downloadMeta,
+      });
 
       removeActiveDownload(downloadId);
       addRecentDownload({
         ...downloadMeta,
+        localBlobId: localBlobInfo?.id || "",
+        localBlobMimeType: localBlobInfo?.mimeType || "",
+        localBlobSize: localBlobInfo?.size || 0,
+        localCacheAvailable: Boolean(localBlobInfo?.id),
         progress: 100,
       });
 
