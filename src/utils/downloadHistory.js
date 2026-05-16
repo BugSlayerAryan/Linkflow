@@ -1,475 +1,132 @@
-// // const DB_NAME = "linkflow-download-cache";
-// // const DB_VERSION = 1;
-// // const STORE_NAME = "blobs";
-
-// // /**
-// //  * Keep this conservative. Browsers can reject very large IndexedDB writes.
-// //  * 150 MB is enough for many shorts/reels but avoids killing storage for huge videos.
-// //  */
-// // export const MAX_DOWNLOAD_CACHE_BYTES = 150 * 1024 * 1024;
-
-// // function openDownloadCacheDb() {
-// //   return new Promise((resolve, reject) => {
-// //     if (!("indexedDB" in window)) {
-// //       reject(new Error("IndexedDB is not supported in this browser."));
-// //       return;
-// //     }
-
-// //     const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-// //     request.onupgradeneeded = () => {
-// //       const db = request.result;
-
-// //       if (!db.objectStoreNames.contains(STORE_NAME)) {
-// //         db.createObjectStore(STORE_NAME, { keyPath: "id" });
-// //       }
-// //     };
-
-// //     request.onsuccess = () => resolve(request.result);
-// //     request.onerror = () =>
-// //       reject(request.error || new Error("Failed to open download cache."));
-// //   });
-// // }
-
-// // function runStoreTransaction(mode, callback) {
-// //   return openDownloadCacheDb().then(
-// //     (db) =>
-// //       new Promise((resolve, reject) => {
-// //         const tx = db.transaction(STORE_NAME, mode);
-// //         const store = tx.objectStore(STORE_NAME);
-
-// //         let requestResult;
-
-// //         try {
-// //           requestResult = callback(store);
-// //         } catch (error) {
-// //           db.close();
-// //           reject(error);
-// //           return;
-// //         }
-
-// //         tx.oncomplete = () => {
-// //           db.close();
-// //           resolve(requestResult?.result);
-// //         };
-
-// //         tx.onerror = () => {
-// //           db.close();
-// //           reject(tx.error || new Error("Download cache transaction failed."));
-// //         };
-
-// //         tx.onabort = () => {
-// //           db.close();
-// //           reject(tx.error || new Error("Download cache transaction aborted."));
-// //         };
-// //       })
-// //   );
-// // }
-
-// // export function canCacheDownloadBlob(blob) {
-// //   return Boolean(
-// //     blob &&
-// //       typeof blob.size === "number" &&
-// //       blob.size > 0 &&
-// //       blob.size <= MAX_DOWNLOAD_CACHE_BYTES
-// //   );
-// // }
-
-// // export async function saveDownloadBlob({
-// //   id,
-// //   blob,
-// //   fileName,
-// //   type = "video",
-// //   aspectRatio = "landscape",
-// //   title = "",
-// // }) {
-// //   if (!id || !canCacheDownloadBlob(blob)) {
-// //     return null;
-// //   }
-
-// //   const record = {
-// //     id,
-// //     blob,
-// //     fileName,
-// //     type,
-// //     aspectRatio,
-// //     title,
-// //     size: blob.size,
-// //     mimeType: blob.type || "",
-// //     createdAt: Date.now(),
-// //   };
-
-// //   await runStoreTransaction("readwrite", (store) => store.put(record));
-
-// //   return {
-// //     id,
-// //     size: blob.size,
-// //     mimeType: blob.type || "",
-// //     fileName,
-// //   };
-// // }
-
-// // export async function getDownloadBlob(id) {
-// //   if (!id) return null;
-
-// //   return runStoreTransaction("readonly", (store) => store.get(id));
-// // }
-
-// // export async function deleteDownloadBlob(id) {
-// //   if (!id) return;
-
-// //   await runStoreTransaction("readwrite", (store) => store.delete(id));
-// // }
-
-// // export async function clearOldDownloadBlobs(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
-// //   const cutoff = Date.now() - maxAgeMs;
-// //   const db = await openDownloadCacheDb();
-
-// //   return new Promise((resolve, reject) => {
-// //     const tx = db.transaction(STORE_NAME, "readwrite");
-// //     const store = tx.objectStore(STORE_NAME);
-// //     const request = store.openCursor();
-
-// //     request.onsuccess = () => {
-// //       const cursor = request.result;
-
-// //       if (cursor) {
-// //         const value = cursor.value;
-
-// //         if (value?.createdAt && value.createdAt < cutoff) {
-// //           cursor.delete();
-// //         }
-
-// //         cursor.continue();
-// //       }
-// //     };
-
-// //     tx.oncomplete = () => {
-// //       db.close();
-// //       resolve();
-// //     };
-
-// //     tx.onerror = () => {
-// //       db.close();
-// //       reject(tx.error || new Error("Could not clean download cache."));
-// //     };
-// //   });
-// // }
-
-
-// const DB_NAME = "linkflow-download-cache";
-// const DB_VERSION = 1;
-// const STORE_NAME = "blobs";
-
-// /**
-//  * Keep this conservative. Browsers can reject very large IndexedDB writes.
-//  * 150 MB is enough for many shorts/reels but avoids killing storage for huge videos.
-//  */
-// export const MAX_DOWNLOAD_CACHE_BYTES = 150 * 1024 * 1024;
-
-// function openDownloadCacheDb() {
-//   return new Promise((resolve, reject) => {
-//     if (!("indexedDB" in window)) {
-//       reject(new Error("IndexedDB is not supported in this browser."));
-//       return;
-//     }
-
-//     const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-//     request.onupgradeneeded = () => {
-//       const db = request.result;
-
-//       if (!db.objectStoreNames.contains(STORE_NAME)) {
-//         db.createObjectStore(STORE_NAME, { keyPath: "id" });
-//       }
-//     };
-
-//     request.onsuccess = () => resolve(request.result);
-//     request.onerror = () =>
-//       reject(request.error || new Error("Failed to open download cache."));
-//   });
-// }
-
-// function runStoreTransaction(mode, callback) {
-//   return openDownloadCacheDb().then(
-//     (db) =>
-//       new Promise((resolve, reject) => {
-//         const tx = db.transaction(STORE_NAME, mode);
-//         const store = tx.objectStore(STORE_NAME);
-
-//         let requestResult;
-
-//         try {
-//           requestResult = callback(store);
-//         } catch (error) {
-//           db.close();
-//           reject(error);
-//           return;
-//         }
-
-//         tx.oncomplete = () => {
-//           db.close();
-//           resolve(requestResult?.result);
-//         };
-
-//         tx.onerror = () => {
-//           db.close();
-//           reject(tx.error || new Error("Download cache transaction failed."));
-//         };
-
-//         tx.onabort = () => {
-//           db.close();
-//           reject(tx.error || new Error("Download cache transaction aborted."));
-//         };
-//       })
-//   );
-// }
-
-// export function canCacheDownloadBlob(blob) {
-//   return Boolean(
-//     blob &&
-//       typeof blob.size === "number" &&
-//       blob.size > 0 &&
-//       blob.size <= MAX_DOWNLOAD_CACHE_BYTES
-//   );
-// }
-
-// export async function saveDownloadBlob({
-//   id,
-//   blob,
-//   fileName,
-//   type = "video",
-//   aspectRatio = "landscape",
-//   title = "",
-// }) {
-//   if (!id || !canCacheDownloadBlob(blob)) {
-//     return null;
-//   }
-
-//   const record = {
-//     id,
-//     blob,
-//     fileName,
-//     type,
-//     aspectRatio,
-//     title,
-//     size: blob.size,
-//     mimeType: blob.type || "",
-//     createdAt: Date.now(),
-//   };
-
-//   await runStoreTransaction("readwrite", (store) => store.put(record));
-
-//   return {
-//     id,
-//     size: blob.size,
-//     mimeType: blob.type || "",
-//     fileName,
-//   };
-// }
-
-// export async function getDownloadBlob(id) {
-//   if (!id) return null;
-
-//   return runStoreTransaction("readonly", (store) => store.get(id));
-// }
-
-// export async function deleteDownloadBlob(id) {
-//   if (!id) return;
-
-//   await runStoreTransaction("readwrite", (store) => store.delete(id));
-// }
-
-// export async function clearOldDownloadBlobs(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
-//   const cutoff = Date.now() - maxAgeMs;
-//   const db = await openDownloadCacheDb();
-
-//   return new Promise((resolve, reject) => {
-//     const tx = db.transaction(STORE_NAME, "readwrite");
-//     const store = tx.objectStore(STORE_NAME);
-//     const request = store.openCursor();
-
-//     request.onsuccess = () => {
-//       const cursor = request.result;
-
-//       if (cursor) {
-//         const value = cursor.value;
-
-//         if (value?.createdAt && value.createdAt < cutoff) {
-//           cursor.delete();
-//         }
-
-//         cursor.continue();
-//       }
-//     };
-
-//     tx.oncomplete = () => {
-//       db.close();
-//       resolve();
-//     };
-
-//     tx.onerror = () => {
-//       db.close();
-//       reject(tx.error || new Error("Could not clean download cache."));
-//     };
-//   });
-// }
-
-
-const DB_NAME = "linkflow-download-cache";
-const DB_VERSION = 1;
-const STORE_NAME = "blobs";
-
-/**
- * Keep this conservative. Browsers can reject very large IndexedDB writes.
- * 150 MB is enough for many shorts/reels but avoids killing storage for huge videos.
- */
-export const MAX_DOWNLOAD_CACHE_BYTES = 150 * 1024 * 1024;
-
-function openDownloadCacheDb() {
-  return new Promise((resolve, reject) => {
-    if (!("indexedDB" in window)) {
-      reject(new Error("IndexedDB is not supported in this browser."));
-      return;
+const RECENT_DOWNLOADS_KEY = "linkflow-download-history";
+const ACTIVE_DOWNLOADS_KEY = "linkflow-active-downloads";
+const MAX_RECENT_DOWNLOADS = 30;
+
+const listeners = new Set();
+
+function safeRead(key, fallback = []) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function safeWrite(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    notifyDownloads();
+  } catch (error) {
+    console.warn("Download history save failed:", error.message);
+  }
+}
+
+function notifyDownloads() {
+  listeners.forEach((listener) => {
+    try {
+      listener();
+    } catch {
+      // Ignore listener errors.
     }
-
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = () => {
-      const db = request.result;
-
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () =>
-      reject(request.error || new Error("Failed to open download cache."));
   });
 }
 
-function runStoreTransaction(mode, callback) {
-  return openDownloadCacheDb().then(
-    (db) =>
-      new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, mode);
-        const store = tx.objectStore(STORE_NAME);
-
-        let requestResult;
-
-        try {
-          requestResult = callback(store);
-        } catch (error) {
-          db.close();
-          reject(error);
-          return;
-        }
-
-        tx.oncomplete = () => {
-          db.close();
-          resolve(requestResult?.result);
-        };
-
-        tx.onerror = () => {
-          db.close();
-          reject(tx.error || new Error("Download cache transaction failed."));
-        };
-
-        tx.onabort = () => {
-          db.close();
-          reject(tx.error || new Error("Download cache transaction aborted."));
-        };
-      })
-  );
-}
-
-export function canCacheDownloadBlob(blob) {
-  return Boolean(
-    blob &&
-      typeof blob.size === "number" &&
-      blob.size > 0 &&
-      blob.size <= MAX_DOWNLOAD_CACHE_BYTES
-  );
-}
-
-export async function saveDownloadBlob({
-  id,
-  blob,
-  fileName,
-  type = "video",
-  aspectRatio = "landscape",
-  title = "",
-}) {
-  if (!id || !canCacheDownloadBlob(blob)) {
-    return null;
+export function subscribeDownloads(listener) {
+  if (typeof listener !== "function") {
+    return () => {};
   }
 
-  const record = {
-    id,
-    blob,
-    fileName,
-    type,
-    aspectRatio,
-    title,
-    size: blob.size,
-    mimeType: blob.type || "",
-    createdAt: Date.now(),
-  };
+  listeners.add(listener);
 
-  await runStoreTransaction("readwrite", (store) => store.put(record));
-
-  return {
-    id,
-    size: blob.size,
-    mimeType: blob.type || "",
-    fileName,
+  return () => {
+    listeners.delete(listener);
   };
 }
 
-export async function getDownloadBlob(id) {
-  if (!id) return null;
-
-  return runStoreTransaction("readonly", (store) => store.get(id));
+export function getRecentDownloads() {
+  return safeRead(RECENT_DOWNLOADS_KEY, []);
 }
 
-export async function deleteDownloadBlob(id) {
+export function getActiveDownloads() {
+  return safeRead(ACTIVE_DOWNLOADS_KEY, []);
+}
+
+export function addRecentDownload(download) {
+  if (!download?.id) return;
+
+  const current = getRecentDownloads();
+  const withoutDuplicate = current.filter((item) => item.id !== download.id);
+
+  const next = [
+    {
+      ...download,
+      status: download.status || "Completed",
+      progress: Number(download.progress || 100),
+      completedAt: download.completedAt || new Date().toISOString(),
+    },
+    ...withoutDuplicate,
+  ].slice(0, MAX_RECENT_DOWNLOADS);
+
+  safeWrite(RECENT_DOWNLOADS_KEY, next);
+}
+
+export function addActiveDownload(download) {
+  if (!download?.id) return;
+
+  const current = getActiveDownloads();
+  const withoutDuplicate = current.filter((item) => item.id !== download.id);
+
+  safeWrite(ACTIVE_DOWNLOADS_KEY, [
+    {
+      ...download,
+      status: download.status || "Preparing...",
+      progress: Number(download.progress || 0),
+      startedAt: download.startedAt || new Date().toISOString(),
+    },
+    ...withoutDuplicate,
+  ]);
+}
+
+export function updateActiveDownload(id, updates = {}) {
   if (!id) return;
 
-  await runStoreTransaction("readwrite", (store) => store.delete(id));
+  const current = getActiveDownloads();
+
+  const next = current.map((item) =>
+    item.id === id
+      ? {
+          ...item,
+          ...updates,
+          progress:
+            updates.progress === undefined
+              ? item.progress
+              : Number(updates.progress || 0),
+        }
+      : item
+  );
+
+  safeWrite(ACTIVE_DOWNLOADS_KEY, next);
 }
 
-export async function clearOldDownloadBlobs(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
-  const cutoff = Date.now() - maxAgeMs;
-  const db = await openDownloadCacheDb();
+export function removeActiveDownload(id) {
+  if (!id) return;
 
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.openCursor();
+  const current = getActiveDownloads();
 
-    request.onsuccess = () => {
-      const cursor = request.result;
+  safeWrite(
+    ACTIVE_DOWNLOADS_KEY,
+    current.filter((item) => item.id !== id)
+  );
+}
 
-      if (cursor) {
-        const value = cursor.value;
+export function clearRecentDownloads() {
+  safeWrite(RECENT_DOWNLOADS_KEY, []);
+}
 
-        if (value?.createdAt && value.createdAt < cutoff) {
-          cursor.delete();
-        }
-
-        cursor.continue();
-      }
-    };
-
-    tx.oncomplete = () => {
-      db.close();
-      resolve();
-    };
-
-    tx.onerror = () => {
-      db.close();
-      reject(tx.error || new Error("Could not clean download cache."));
-    };
-  });
+export function clearActiveDownloads() {
+  safeWrite(ACTIVE_DOWNLOADS_KEY, []);
 }
