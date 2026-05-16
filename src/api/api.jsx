@@ -167,6 +167,7 @@
 // }
 
 
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://linkflow-server.onrender.com";
 
@@ -175,6 +176,11 @@ export const getApiBaseUrl = () => API_BASE_URL.replace(/\/$/, "");
 export const getProxyImageUrl = (url) => {
   if (!url) return "";
   return `${getApiBaseUrl()}/api/v1/proxy-image?url=${encodeURIComponent(url)}`;
+};
+
+export const getPreviewVideoUrl = (url) => {
+  if (!url) return "";
+  return `${getApiBaseUrl()}/api/v1/preview?url=${encodeURIComponent(url)}`;
 };
 
 async function getErrorMessage(response, fallbackMessage) {
@@ -199,7 +205,9 @@ export async function fetchMediaInfo(url, signal) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || data.details || "Unable to fetch video details.");
+    throw new Error(
+      data.error || data.details || "Unable to fetch video details."
+    );
   }
 
   return data;
