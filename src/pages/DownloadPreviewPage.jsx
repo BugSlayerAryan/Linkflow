@@ -1,6 +1,5 @@
 
 
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -99,6 +98,46 @@ function getFixedPreviewUrl(originalUrl) {
   )}`;
 }
 
+function getMediaAspectRatio(media, fallback = "landscape") {
+  const width = Number(media?.width || 0);
+  const height = Number(media?.height || 0);
+
+  if (width > 0 && height > 0) {
+    if (height > width) return "portrait";
+    if (width === height) return "square";
+    return "landscape";
+  }
+
+  const quality = String(media?.quality || "");
+  const match = quality.match(/(\d{3,4})\s*[x×]\s*(\d{3,4})/i);
+
+  if (match) {
+    const parsedWidth = Number(match[1]);
+    const parsedHeight = Number(match[2]);
+
+    if (parsedWidth > 0 && parsedHeight > 0) {
+      if (parsedHeight > parsedWidth) return "portrait";
+      if (parsedWidth === parsedHeight) return "square";
+      return "landscape";
+    }
+  }
+
+  return media?.aspectRatio || fallback || "landscape";
+}
+
+function getNaturalAspectRatioFromVideo(videoElement) {
+  const width = Number(videoElement?.videoWidth || 0);
+  const height = Number(videoElement?.videoHeight || 0);
+
+  if (width > 0 && height > 0) {
+    if (height > width) return "portrait";
+    if (width === height) return "square";
+    return "landscape";
+  }
+
+  return "";
+}
+
 function hasConfirmedAudio(media) {
   const acodec = String(media?.acodec || "").toLowerCase();
 
@@ -126,6 +165,7 @@ function DownloadPreviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [naturalAspectRatio, setNaturalAspectRatio] = useState("");
   const [activeDownload, setActiveDownload] = useState(null);
 
   const videoOptions = videoInfo?.video || [];
@@ -149,7 +189,8 @@ function DownloadPreviewPage() {
   const audioPreviewUrl = format === "audio" ? selectedMedia?.url || "" : "";
 
   const activeAspectRatio =
-    selectedMedia?.aspectRatio || videoInfo?.aspectRatio || "landscape";
+    naturalAspectRatio ||
+    getMediaAspectRatio(selectedMedia, videoInfo?.aspectRatio || "landscape");
 
   const isPortrait = activeAspectRatio === "portrait";
   const isSquare = activeAspectRatio === "square";
@@ -160,6 +201,8 @@ function DownloadPreviewPage() {
   };
 
   const resetPreviewMedia = () => {
+    setNaturalAspectRatio("");
+
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
@@ -397,6 +440,14 @@ function DownloadPreviewPage() {
     audioRef.current.muted = videoRef.current.muted;
   };
 
+  const handleVideoLoadedMetadata = () => {
+    const detectedAspectRatio = getNaturalAspectRatioFromVideo(videoRef.current);
+
+    if (detectedAspectRatio) {
+      setNaturalAspectRatio(detectedAspectRatio);
+    }
+  };
+
   const handleVideoPlay = async () => {
     if (!audioRef.current || !videoRef.current || !syncedAudioUrl) return;
 
@@ -509,9 +560,10 @@ function DownloadPreviewPage() {
         aspectRatio:
           format === "audio"
             ? "audio"
-            : selectedMedia?.aspectRatio ||
-              videoInfo?.aspectRatio ||
-              "landscape",
+            : getMediaAspectRatio(
+                selectedMedia,
+                videoInfo?.aspectRatio || "landscape"
+              ),
         originalUrl,
         sourceUrl: originalUrl,
         platform: videoInfo?.platform || platform,
@@ -839,10 +891,10 @@ function DownloadPreviewPage() {
             <div
               className={`relative mx-auto overflow-hidden rounded-[26px] bg-black shadow-[0_28px_90px_rgba(2,6,23,0.38)] ${
                 isPortrait
-                  ? "h-[min(68svh,660px)] aspect-[9/16]"
+                  ? "h-[min(72svh,720px)] max-h-[720px] aspect-[9/16]"
                   : isSquare
-                  ? "h-[min(62svh,590px)] aspect-square"
-                  : "w-full max-w-[920px] aspect-video"
+                  ? "h-[min(66svh,620px)] max-h-[620px] aspect-square"
+                  : "w-full max-w-[980px] aspect-video"
               }`}
             >
               {isLoading ? (
@@ -889,6 +941,7 @@ function DownloadPreviewPage() {
                     playsInline
                     preload="metadata"
                     autoPlay={shouldAutoplay}
+                    onLoadedMetadata={handleVideoLoadedMetadata}
                     onPlay={handleVideoPlay}
                     onPause={handleVideoPause}
                     onEnded={handleVideoEnded}
