@@ -16,18 +16,14 @@
 // import BrandLogo from "../common/BrandLogo";
 // import HeroPreview from "./HeroPreview";
 
-// const RAW_API_BASE_URL =
+// const API_BASE_URL =
 //   import.meta.env.VITE_API_BASE_URL || "http://localhost:3030";
-
-// const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
-
-// /**
-//  * Must match DownloadPreviewPage cache version.
-//  */
-// const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v18";
 
 // const colorTransitionClass =
 //   "transition-colors duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+
+// const smoothTransitionClass =
+//   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
 // const supportedDomains = [
 //   "youtube.com",
@@ -40,12 +36,7 @@
 //   "tiktok.com",
 //   "vimeo.com",
 //   "dailymotion.com",
-//   "ted.com",
-//   "archive.org",
-//   "reddit.com",
 // ];
-
-// const steps = ["Analyze", "Formats", "Preview"];
 
 // function isValidVideoUrl(value) {
 //   try {
@@ -71,37 +62,6 @@
 //   });
 // }
 
-// function getFriendlyError(error) {
-//   const code = error?.cause?.data?.code;
-//   const message = error?.cause?.data?.error || error?.message;
-
-//   if (code === "YOUTUBE_BLOCKED_ON_SERVER") {
-//     return "YouTube blocked this server request. Please try another platform for now.";
-//   }
-
-//   if (code === "INSTAGRAM_RATE_LIMITED") {
-//     return "Instagram is rate-limiting the server. Please wait and try another public reel.";
-//   }
-
-//   if (code === "INSTAGRAM_LOGIN_REQUIRED") {
-//     return "Instagram could not access this content. It may require login or may be unavailable.";
-//   }
-
-//   if (code === "RATE_LIMITED") {
-//     return "This platform is rate-limiting the server. Please wait and try again later.";
-//   }
-
-//   if (code === "LOGIN_OR_COOKIES_REQUIRED") {
-//     return "This video may require login or cookies. Try another public video link.";
-//   }
-
-//   if (code === "UNSUPPORTED_URL") {
-//     return "This website or link format is not supported yet.";
-//   }
-
-//   return message || "Unable to fetch video details. Please try again.";
-// }
-
 // async function fetchMediaWithRetry(url, onRetry) {
 //   const maxAttempts = 2;
 //   let lastErrorData = null;
@@ -121,11 +81,7 @@
 //       const data = await response.json().catch(() => null);
 
 //       if (response.ok && data?.status === "success") {
-//         return {
-//           ...data,
-//           previewUrl: data.previewUrl || "",
-//           rawPreviewUrl: data.rawPreviewUrl || "",
-//         };
+//         return data;
 //       }
 
 //       lastErrorData = data;
@@ -136,16 +92,9 @@
 //         continue;
 //       }
 
-//       const error = new Error(
+//       throw new Error(
 //         data?.error || "Unable to fetch video details. Please try again."
 //       );
-
-//       error.cause = {
-//         status: response.status,
-//         data,
-//       };
-
-//       throw error;
 //     } catch (error) {
 //       if (attempt < maxAttempts) {
 //         onRetry?.();
@@ -153,21 +102,14 @@
 //         continue;
 //       }
 
-//       if (error?.cause?.data) {
-//         throw error;
-//       }
-
-//       const wrappedError = new Error(
+//       throw new Error(
 //         lastErrorData?.error ||
 //           error?.message ||
-//           "Backend connection failed. Please try again."
+//           "Backend connection failed. Please try again.",
+//         {
+//           cause: error,
+//         }
 //       );
-
-//       wrappedError.cause = {
-//         data: lastErrorData,
-//       };
-
-//       throw wrappedError;
 //     }
 //   }
 
@@ -175,19 +117,31 @@
 // }
 
 // function PreparingOverlay({ progress, loadingText }) {
-//   return (
-//     <div className="fixed inset-0 z-[999] grid place-items-center bg-slate-950/60 px-5 backdrop-blur-md">
-//       <div className="relative w-full max-w-[460px] overflow-hidden rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-[0_28px_90px_rgba(2,6,23,0.25)] dark:border-white/10 dark:bg-slate-950">
-//         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500" />
+//   const steps = [
+//     "Checking link",
+//     "Fetching formats",
+//     "Opening preview",
+//   ];
 
-//         <div className="flex items-start gap-4">
-//           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-500/12 text-violet-500">
-//             <Loader2 className="h-6 w-6 animate-spin" />
+//   return (
+//     <div className="fixed inset-0 z-[999] grid place-items-center bg-white/70 px-4 backdrop-blur-xl dark:bg-slate-950/72 sm:px-5">
+//       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(168,85,247,0.20),transparent_34%),radial-gradient(circle_at_35%_65%,rgba(217,70,239,0.16),transparent_28%)]" />
+
+//       <div
+//         className={`relative w-full max-w-[520px] overflow-hidden rounded-[32px] border border-slate-200/80 bg-white/88 p-5 shadow-[0_30px_110px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/88 dark:shadow-[0_34px_120px_rgba(0,0,0,0.48)] sm:p-6 ${smoothTransitionClass}`}
+//       >
+//         <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/80 to-transparent" />
+//         <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-fuchsia-500/20 blur-[75px]" />
+//         <div className="pointer-events-none absolute -bottom-20 left-8 h-48 w-48 rounded-full bg-violet-500/20 blur-[85px]" />
+
+//         <div className="relative flex items-start gap-4">
+//           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-violet-500/20 bg-violet-500/12 text-violet-600 shadow-[0_0_34px_rgba(139,92,246,0.18)] dark:text-violet-300">
+//             <Loader2 className="h-7 w-7 animate-spin" />
 //           </div>
 
 //           <div className="min-w-0 flex-1">
 //             <div className="flex items-center gap-2">
-//               <h3 className="truncate text-base font-bold tracking-[-0.02em] text-slate-950 dark:text-white">
+//               <h3 className="text-[18px] font-bold tracking-[-0.02em] text-slate-950 dark:text-white">
 //                 {loadingText}
 //               </h3>
 
@@ -324,7 +278,7 @@
 //     }
 
 //     if (!isValidVideoUrl(trimmedUrl)) {
-//       toast.error("Invalid video link. Please paste a valid public URL.");
+//       toast.error("Invalid video link. Please paste a valid URL.");
 //       return;
 //     }
 
@@ -350,27 +304,23 @@
 //       setLoadingText("Opening preview page...");
 //       setProgress(100);
 
-//       const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${trimmedUrl}`;
+//       const cacheKey = `linkflow-media:${trimmedUrl}`;
 
 //       sessionStorage.setItem(
 //         cacheKey,
 //         JSON.stringify({
 //           url: trimmedUrl,
-//           data: {
-//             ...data,
-//             previewUrl: data.previewUrl || "",
-//             rawPreviewUrl: data.rawPreviewUrl || "",
-//           },
+//           data,
 //           createdAt: Date.now(),
 //         })
 //       );
 
 //       await wait(350);
 
-//       navigate(`/download?url=${encodeURIComponent(trimmedUrl)}&autoplay=1`);
+//       navigate(`/download?url=${encodeURIComponent(trimmedUrl)}`);
 //     } catch (error) {
 //       console.error("Video prepare error:", error);
-//       toast.error(getFriendlyError(error));
+//       toast.error(error.message || "Backend connection failed.");
 //     } finally {
 //       resetPreparingState();
 //     }
@@ -406,8 +356,8 @@
 //           <p
 //             className={`mx-auto mt-5 max-w-[560px] text-[15px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 lg:mx-0 lg:text-[17px] ${colorTransitionClass}`}
 //           >
-//             Save videos from Instagram, Facebook, X.com, TikTok, Vimeo and more
-//             public websites in MP4 or MP3 format. Fast, secure and easy to use.
+//             Save videos from YouTube, Instagram, Facebook, Twitter and 1000+
+//             websites in MP4 or MP3 format. Fast, free and unlimited.
 //           </p>
 
 //           <div className="mx-auto mt-7 max-w-[460px] rounded-[1.35rem] border border-[var(--input-border)] bg-[var(--input-shell-bg)] p-1.5 shadow-[0_18px_55px_var(--shadow-soft)] backdrop-blur-xl transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:mx-0">
@@ -421,6 +371,7 @@
 //               <input
 //                 type="url"
 //                 value={videoUrl}
+//                 disabled={isPreparing}
 //                 onChange={(event) => setVideoUrl(event.target.value)}
 //                 onKeyDown={(event) => {
 //                   if (event.key === "Enter") {
@@ -428,13 +379,14 @@
 //                   }
 //                 }}
 //                 placeholder="Paste your video link here..."
-//                 className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] sm:text-sm ${colorTransitionClass}`}
+//                 className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
 //               />
 
 //               <button
 //                 type="button"
 //                 onClick={handlePaste}
-//                 className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 sm:h-10 sm:px-3.5"
+//                 disabled={isPreparing}
+//                 className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5"
 //               >
 //                 {isPasted ? (
 //                   <>
@@ -472,8 +424,8 @@
 //               Supported Platforms
 //             </p>
 
-//             <div className="mt-4 flex flex-wrap items-center justify-center gap-3.5 lg:justify-start">
-//               {["instagram", "facebook", "twitter", "tiktok"].map((brand) => (
+//             <div className="mt-4 flex items-center justify-center gap-3.5 lg:justify-start">
+//               {["youtube", "instagram", "facebook", "twitter"].map((brand) => (
 //                 <BrandLogo
 //                   key={brand}
 //                   name={brand}
@@ -481,18 +433,13 @@
 //                 />
 //               ))}
 //             </div>
-
-//             <p className="mt-3 text-center text-[11px] font-medium text-[var(--text-muted)] lg:text-left">
-//               Also supports Vimeo, TED, Internet Archive, and selected Reddit
-//               public video posts.
-//             </p>
 //           </div>
 
 //           <div
 //             className={`mx-auto mt-5 flex max-w-[520px] flex-wrap justify-center gap-x-4 gap-y-3 text-[11px] font-medium text-[var(--text-muted)] lg:mx-0 lg:justify-start ${colorTransitionClass}`}
 //           >
 //             {[
-//               "Public Links Only",
+//               "100% Safe & Secure",
 //               "No Software to Install",
 //               "Works on All Devices",
 //             ].map((item) => (
@@ -529,19 +476,13 @@ import {
 import PillBadge from "../common/PillBadge";
 import BrandLogo from "../common/BrandLogo";
 import HeroPreview from "./HeroPreview";
-
-const RAW_API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3030";
-
-const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
-
-/**
- * Must match DownloadPreviewPage cache version.
- */
-const MEDIA_CACHE_VERSION = "raw-preview-download-audio-v23";
+import { fetchMediaInfo } from "../../api/api";
 
 const colorTransitionClass =
   "transition-colors duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+
+const smoothTransitionClass =
+  "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
 const supportedDomains = [
   "youtube.com",
@@ -554,12 +495,7 @@ const supportedDomains = [
   "tiktok.com",
   "vimeo.com",
   "dailymotion.com",
-  "ted.com",
-  "archive.org",
-  "reddit.com",
 ];
-
-const steps = ["Analyze", "Formats", "Preview"];
 
 function isValidVideoUrl(value) {
   try {
@@ -585,61 +521,16 @@ function wait(ms) {
   });
 }
 
-function getFriendlyError(error) {
-  const code = error?.cause?.data?.code;
-  const message = error?.cause?.data?.error || error?.message;
-
-  if (code === "YOUTUBE_BLOCKED_ON_SERVER") {
-    return "YouTube blocked this server request. Please try another platform for now.";
-  }
-
-  if (code === "INSTAGRAM_RATE_LIMITED") {
-    return "Instagram is rate-limiting the server. Please wait and try another public reel.";
-  }
-
-  if (code === "INSTAGRAM_LOGIN_REQUIRED") {
-    return "Instagram could not access this content. It may require login or may be unavailable.";
-  }
-
-  if (code === "RATE_LIMITED") {
-    return "This platform is rate-limiting the server. Please wait and try again later.";
-  }
-
-  if (code === "LOGIN_OR_COOKIES_REQUIRED") {
-    return "This video may require login or cookies. Try another public video link.";
-  }
-
-  if (code === "UNSUPPORTED_URL") {
-    return "This website or link format is not supported yet.";
-  }
-
-  return message || "Unable to fetch video details. Please try again.";
-}
-
 async function fetchMediaWithRetry(url, onRetry) {
   const maxAttempts = 2;
   let lastErrorData = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/media`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          urls: url,
-        }),
-      });
+      const data = await fetchMediaInfo(url);
 
-      const data = await response.json().catch(() => null);
-
-      if (response.ok && data?.status === "success") {
-        return {
-          ...data,
-          previewUrl: data.previewUrl || "",
-          rawPreviewUrl: data.rawPreviewUrl || "",
-        };
+      if (data?.status === "success") {
+        return data;
       }
 
       lastErrorData = data;
@@ -650,16 +541,9 @@ async function fetchMediaWithRetry(url, onRetry) {
         continue;
       }
 
-      const error = new Error(
+      throw new Error(
         data?.error || "Unable to fetch video details. Please try again."
       );
-
-      error.cause = {
-        status: response.status,
-        data,
-      };
-
-      throw error;
     } catch (error) {
       if (attempt < maxAttempts) {
         onRetry?.();
@@ -667,21 +551,14 @@ async function fetchMediaWithRetry(url, onRetry) {
         continue;
       }
 
-      if (error?.cause?.data) {
-        throw error;
-      }
-
-      const wrappedError = new Error(
+      throw new Error(
         lastErrorData?.error ||
           error?.message ||
-          "Backend connection failed. Please try again."
+          "Backend connection failed. Please try again.",
+        {
+          cause: error,
+        }
       );
-
-      wrappedError.cause = {
-        data: lastErrorData,
-      };
-
-      throw wrappedError;
     }
   }
 
@@ -689,19 +566,27 @@ async function fetchMediaWithRetry(url, onRetry) {
 }
 
 function PreparingOverlay({ progress, loadingText }) {
-  return (
-    <div className="fixed inset-0 z-[999] grid place-items-center bg-slate-950/60 px-5 backdrop-blur-md">
-      <div className="relative w-full max-w-[460px] overflow-hidden rounded-[28px] border border-slate-200/70 bg-white p-5 shadow-[0_28px_90px_rgba(2,6,23,0.25)] dark:border-white/10 dark:bg-slate-950">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500" />
+  const steps = ["Checking link", "Fetching formats", "Opening preview"];
 
-        <div className="flex items-start gap-4">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-500/12 text-violet-500">
-            <Loader2 className="h-6 w-6 animate-spin" />
+  return (
+    <div className="fixed inset-0 z-[999] grid place-items-center bg-white/70 px-4 backdrop-blur-xl dark:bg-slate-950/72 sm:px-5">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(168,85,247,0.20),transparent_34%),radial-gradient(circle_at_35%_65%,rgba(217,70,239,0.16),transparent_28%)]" />
+
+      <div
+        className={`relative w-full max-w-[520px] overflow-hidden rounded-[32px] border border-slate-200/80 bg-white/88 p-5 shadow-[0_30px_110px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/88 dark:shadow-[0_34px_120px_rgba(0,0,0,0.48)] sm:p-6 ${smoothTransitionClass}`}
+      >
+        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/80 to-transparent" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-fuchsia-500/20 blur-[75px]" />
+        <div className="pointer-events-none absolute -bottom-20 left-8 h-48 w-48 rounded-full bg-violet-500/20 blur-[85px]" />
+
+        <div className="relative flex items-start gap-4">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-violet-500/20 bg-violet-500/12 text-violet-600 shadow-[0_0_34px_rgba(139,92,246,0.18)] dark:text-violet-300">
+            <Loader2 className="h-7 w-7 animate-spin" />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="truncate text-base font-bold tracking-[-0.02em] text-slate-950 dark:text-white">
+              <h3 className="text-[18px] font-bold tracking-[-0.02em] text-slate-950 dark:text-white">
                 {loadingText}
               </h3>
 
@@ -838,7 +723,7 @@ function HeroSection() {
     }
 
     if (!isValidVideoUrl(trimmedUrl)) {
-      toast.error("Invalid video link. Please paste a valid public URL.");
+      toast.error("Invalid video link. Please paste a valid URL.");
       return;
     }
 
@@ -864,27 +749,23 @@ function HeroSection() {
       setLoadingText("Opening preview page...");
       setProgress(100);
 
-      const cacheKey = `${MEDIA_CACHE_VERSION}:linkflow-media:${trimmedUrl}`;
+      const cacheKey = `linkflow-media:${trimmedUrl}`;
 
       sessionStorage.setItem(
         cacheKey,
         JSON.stringify({
           url: trimmedUrl,
-          data: {
-            ...data,
-            previewUrl: data.previewUrl || "",
-            rawPreviewUrl: data.rawPreviewUrl || "",
-          },
+          data,
           createdAt: Date.now(),
         })
       );
 
       await wait(350);
 
-      navigate(`/download?url=${encodeURIComponent(trimmedUrl)}&autoplay=1`);
+      navigate(`/download?url=${encodeURIComponent(trimmedUrl)}`);
     } catch (error) {
       console.error("Video prepare error:", error);
-      toast.error(getFriendlyError(error));
+      toast.error(error.message || "Backend connection failed.");
     } finally {
       resetPreparingState();
     }
@@ -920,8 +801,8 @@ function HeroSection() {
           <p
             className={`mx-auto mt-5 max-w-[560px] text-[15px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 lg:mx-0 lg:text-[17px] ${colorTransitionClass}`}
           >
-            Save videos from Instagram, Facebook, X.com, TikTok, Vimeo and more
-            public websites in MP4 or MP3 format. Fast, secure and easy to use.
+            Save videos from YouTube, Instagram, Facebook, Twitter and 1000+
+            websites in MP4 or MP3 format. Fast, free and unlimited.
           </p>
 
           <div className="mx-auto mt-7 max-w-[460px] rounded-[1.35rem] border border-[var(--input-border)] bg-[var(--input-shell-bg)] p-1.5 shadow-[0_18px_55px_var(--shadow-soft)] backdrop-blur-xl transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] lg:mx-0">
@@ -935,6 +816,7 @@ function HeroSection() {
               <input
                 type="url"
                 value={videoUrl}
+                disabled={isPreparing}
                 onChange={(event) => setVideoUrl(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
@@ -942,13 +824,14 @@ function HeroSection() {
                   }
                 }}
                 placeholder="Paste your video link here..."
-                className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] sm:text-sm ${colorTransitionClass}`}
+                className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
               />
 
               <button
                 type="button"
                 onClick={handlePaste}
-                className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 sm:h-10 sm:px-3.5"
+                disabled={isPreparing}
+                className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5"
               >
                 {isPasted ? (
                   <>
@@ -986,8 +869,8 @@ function HeroSection() {
               Supported Platforms
             </p>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3.5 lg:justify-start">
-              {["instagram", "facebook", "twitter", "tiktok"].map((brand) => (
+            <div className="mt-4 flex items-center justify-center gap-3.5 lg:justify-start">
+              {["youtube", "instagram", "facebook", "twitter"].map((brand) => (
                 <BrandLogo
                   key={brand}
                   name={brand}
@@ -995,18 +878,13 @@ function HeroSection() {
                 />
               ))}
             </div>
-
-            <p className="mt-3 text-center text-[11px] font-medium text-[var(--text-muted)] lg:text-left">
-              Also supports Vimeo, TED, Internet Archive, and selected Reddit
-              public video posts.
-            </p>
           </div>
 
           <div
             className={`mx-auto mt-5 flex max-w-[520px] flex-wrap justify-center gap-x-4 gap-y-3 text-[11px] font-medium text-[var(--text-muted)] lg:mx-0 lg:justify-start ${colorTransitionClass}`}
           >
             {[
-              "Public Links Only",
+              "100% Safe & Secure",
               "No Software to Install",
               "Works on All Devices",
             ].map((item) => (

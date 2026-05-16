@@ -1,3 +1,180 @@
+// import { useState } from "react";
+// import {
+//   BadgeCheck,
+//   ChevronDown,
+//   Lock,
+//   Shield,
+//   ShieldCheck,
+// } from "lucide-react";
+
+// const faqs = [
+//   {
+//     question: "Is LinkFlow Downloader really free?",
+//     answer:
+//       "Yes. LinkFlow Downloader is free to use for basic video downloads. You can paste a supported video link and download without installing any software.",
+//   },
+//   {
+//     question: "What websites are supported?",
+//     answer:
+//       "LinkFlow supports popular platforms like YouTube, TikTok, Instagram, Facebook, Twitter/X, Vimeo, Dailymotion, and many other websites.",
+//   },
+//   {
+//     question: "Do I need to install any software?",
+//     answer:
+//       "No installation is required. LinkFlow works directly in your browser, so you can download videos on desktop, tablet, or mobile.",
+//   },
+//   {
+//     question: "Is it safe to use?",
+//     answer:
+//       "Yes. We use secure connections and do not require personal information for basic downloads. Your links are processed safely and privately.",
+//   },
+//   {
+//     question: "What formats are available?",
+//     answer:
+//       "You can download videos in popular formats like MP4 and WEBM, or extract audio in formats like MP3, M4A, AAC, OGG, and WAV.",
+//   },
+// ];
+
+// function FAQSection() {
+//   const [openIndex, setOpenIndex] = useState(0);
+
+//   const handleToggle = (index) => {
+//     setOpenIndex((currentIndex) => (currentIndex === index ? null : index));
+//   };
+
+//   return (
+//     <section
+//       id="faq"
+//       className="relative overflow-hidden border-b border-white/[0.06] bg-[#030712] px-6 py-12 sm:px-8 lg:px-14 xl:px-20"
+//     >
+//       <div className="absolute left-1/2 top-10 h-52 w-[560px] -translate-x-1/2 rounded-full bg-violet-600/8 blur-[95px]" />
+
+//       <div className="relative mx-auto max-w-[1320px]">
+//         <div className="mx-auto max-w-3xl text-center">
+//           <h2 className="text-[30px] font-semibold tracking-[-0.02em] text-white sm:text-[36px]">
+//             Frequently Asked{" "}
+//             <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-purple-500 bg-clip-text text-transparent">
+//               Questions
+//             </span>
+//           </h2>
+
+//           <p className="mt-3 text-sm leading-6 text-slate-400">
+//             Everything you need to know before using LinkFlow.
+//           </p>
+//         </div>
+
+//         <div className="mt-9 grid gap-5 rounded-[28px] border border-white/10 bg-slate-900/35 p-4 shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur lg:grid-cols-[1.05fr_0.95fr] lg:p-5">
+//           <div className="space-y-3">
+//             {faqs.map((faq, index) => {
+//               const isOpen = openIndex === index;
+
+//               return (
+//                 <div
+//                   key={faq.question}
+//                   className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
+//                     isOpen
+//                       ? "border-violet-400/25 bg-violet-500/[0.045] shadow-[0_12px_34px_rgba(124,58,237,0.1)]"
+//                       : "border-white/10 bg-[#070b19]/70 hover:border-white/15 hover:bg-slate-900/70"
+//                   }`}
+//                 >
+//                   <button
+//                     type="button"
+//                     onClick={() => handleToggle(index)}
+//                     className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
+//                     aria-expanded={isOpen}
+//                   >
+//                     <span
+//                       className={`text-[14px] font-medium leading-6 transition ${
+//                         isOpen ? "text-slate-100" : "text-slate-300"
+//                       }`}
+//                     >
+//                       {faq.question}
+//                     </span>
+
+//                     <span
+//                       className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg transition ${
+//                         isOpen
+//                           ? "bg-violet-500/10 text-violet-300"
+//                           : "bg-white/[0.03] text-slate-500"
+//                       }`}
+//                     >
+//                       <ChevronDown
+//                         className={`h-4 w-4 transition-transform duration-300 ${
+//                           isOpen ? "rotate-180" : ""
+//                         }`}
+//                       />
+//                     </span>
+//                   </button>
+
+//                   <div
+//                     className={`grid transition-all duration-300 ease-out ${
+//                       isOpen
+//                         ? "grid-rows-[1fr] opacity-100"
+//                         : "grid-rows-[0fr] opacity-0"
+//                     }`}
+//                   >
+//                     <div className="overflow-hidden">
+//                       <p className="px-4 pb-3 pr-12 text-[13px] leading-6 text-slate-400">
+//                         {faq.answer}
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </div>
+//               );
+//             })}
+//           </div>
+
+//           <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#080d1e]/90 p-6 shadow-[0_16px_50px_rgba(2,6,23,0.24)]">
+//             <div className="absolute right-8 top-8 h-52 w-52 rounded-full bg-violet-600/20 blur-[70px]" />
+
+//             <div className="relative grid h-full gap-7 lg:grid-cols-[1fr_170px] lg:items-center">
+//               <div>
+//                 <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-violet-500/10 text-violet-300 shadow-[0_0_28px_rgba(139,92,246,0.26)]">
+//                   <ShieldCheck className="h-7 w-7 stroke-[1.8]" />
+//                 </div>
+
+//                 <h3 className="text-[20px] font-semibold tracking-[-0.015em] text-white">
+//                   Your Safety is Our Priority
+//                 </h3>
+
+//                 <p className="mt-3 max-w-md text-[14px] leading-7 text-slate-400">
+//                   We use advanced encryption and secure connections to ensure
+//                   your data is always protected.
+//                 </p>
+
+//                 <div className="mt-5 space-y-3">
+//                   {[
+//                     "No registration required",
+//                     "No personal data collection",
+//                     "100% secure and anonymous",
+//                   ].map((item) => (
+//                     <p
+//                       key={item}
+//                       className="flex items-center gap-2.5 text-[14px] font-medium text-slate-300"
+//                     >
+//                       <BadgeCheck className="h-[18px] w-[18px] shrink-0 text-emerald-400" />
+//                       {item}
+//                     </p>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               <div className="relative mx-auto grid h-[160px] w-[160px] place-items-center rounded-[28px] border border-violet-400/20 bg-gradient-to-br from-violet-600/20 to-blue-600/10 shadow-[0_0_55px_rgba(124,58,237,0.25)] lg:mx-0">
+//                 <Shield className="h-24 w-24 text-violet-400" />
+//                 <Lock className="absolute h-10 w-10 text-white" />
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
+
+// export default FAQSection;
+
+
+
 
 import { useState } from "react";
 import {
