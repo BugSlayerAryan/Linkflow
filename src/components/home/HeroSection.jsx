@@ -905,6 +905,9 @@
 // export default HeroSection;
 
 
+
+
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -1192,7 +1195,7 @@ function HeroSection() {
         await wait(minimumLoadingTime - elapsed);
       }
 
-      setLoadingText(data?.fallbackUsed ? "Fallback ready, opening preview..." : "Opening preview page...");
+      setLoadingText("Opening preview page...");
       setProgress(100);
 
       const cacheKey = `linkflow-media-v3:${trimmedUrl}`;

@@ -4193,7 +4193,6 @@
 
 
 
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -4219,6 +4218,7 @@ import {
 
 import {
   downloadDirectMedia,
+  downloadFallbackMedia,
   fetchMediaInfo,
   getApiBaseUrl,
   getProxyImageUrl,
@@ -4314,7 +4314,7 @@ function DownloadPreviewPage() {
 
   const [format, setFormat] = useState("video");
   const [videoInfo, setVideoInfo] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [activeDownload, setActiveDownload] = useState(null);
@@ -4711,7 +4711,7 @@ function DownloadPreviewPage() {
         /**
          * Save backend preview URL, not raw CDN URL.
          */
-        previewUrl: format === "video" ? selectedPreview || videoInfo?.previewUrl || "" : "",
+        previewUrl: format === "video" ? videoInfo?.previewUrl || "" : "",
         audioPreviewUrl: format === "audio" ? selectedMedia?.url || "" : "",
         hasAudio: hasConfirmedAudio(selectedMedia),
 
@@ -4745,31 +4745,62 @@ function DownloadPreviewPage() {
       const controller = new AbortController();
       downloadAbortRef.current = controller;
 
-      const response = await downloadDirectMedia(
-        {
-          type: format,
-          title: videoInfo?.title || "linkflow-download",
+      const payload = {
+        type: format,
+        title: videoInfo?.title || "linkflow-download",
+        originalUrl,
+        platform: videoInfo?.platform || "",
+        videoUrl: format === "video" ? selectedMedia.url : "",
+        audioUrl:
+          format === "audio"
+            ? selectedMedia.url
+            : selectedMedia.audioUrl || "",
+        videoFormatId: format === "video" ? selectedMedia.formatId || "" : "",
+        audioFormatId:
+          format === "audio"
+            ? selectedMedia.formatId || ""
+            : selectedMedia.audioFormatId || "",
+        hasAudio: hasConfirmedAudio(selectedMedia),
+        ext: selectedMedia.ext || "",
+      };
 
-          originalUrl,
-          platform: videoInfo?.platform || "",
+      const shouldUseFallbackRoute =
+        videoInfo?.sourceEngine === "rapidapi" ||
+        selectedMedia?.sourceEngine === "rapidapi" ||
+        String(selectedMedia?.formatId || "").startsWith("rapidapi-");
 
-          videoUrl: format === "video" ? selectedMedia.url : "",
-          audioUrl:
-            format === "audio"
-              ? selectedMedia.url
-              : selectedMedia.audioUrl || "",
+      let response;
 
-          videoFormatId: format === "video" ? selectedMedia.formatId || "" : "",
-          audioFormatId:
-            format === "audio"
-              ? selectedMedia.formatId || ""
-              : selectedMedia.audioFormatId || "",
+      if (shouldUseFallbackRoute) {
+        console.log("Using fallback download route because media source is RapidAPI.");
 
-          hasAudio: hasConfirmedAudio(selectedMedia),
-          ext: selectedMedia.ext || "",
-        },
-        controller.signal
-      );
+        response = await downloadFallbackMedia(
+          {
+            type: format,
+            title: videoInfo?.title || "linkflow-download",
+            originalUrl,
+          },
+          controller.signal
+        );
+      } else {
+        try {
+          response = await downloadDirectMedia(payload, controller.signal);
+        } catch (error) {
+          console.warn(
+            "Direct download failed, trying fallback route:",
+            error.message
+          );
+
+          response = await downloadFallbackMedia(
+            {
+              type: format,
+              title: videoInfo?.title || "linkflow-download",
+              originalUrl,
+            },
+            controller.signal
+          );
+        }
+      }
 
       console.log("Download engine:", response.headers.get("X-Download-Engine"));
       console.log("Fallback used:", response.headers.get("X-Fallback-Used"));
@@ -4975,7 +5006,16 @@ function DownloadPreviewPage() {
                   : "w-full max-w-[920px] aspect-video"
               }`}
             >
-              {format === "audio" ? (
+              {isLoading ? (
+                <div className="absolute inset-0 grid place-items-center bg-slate-950">
+                  <div className="text-center">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-violet-400" />
+                    <p className="mt-3 text-sm font-medium text-slate-300">
+                      Loading preview...
+                    </p>
+                  </div>
+                </div>
+              ) : format === "audio" ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-violet-950 via-slate-950 to-fuchsia-950 px-5">
                   <div className="grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-violet-200">
                     <FileMusic className="h-10 w-10" />
