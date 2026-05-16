@@ -56,39 +56,116 @@ function getDownloadFileName(title, format) {
   return `${safeTitle || "linkflow-download"}.${extension}`;
 }
 
-function getPrettyQuality(quality = "", ext = "") {
-  const normalized = String(quality || "").toLowerCase();
+function getDimensionsFromQualityText(quality = "") {
+  const match = String(quality || "").match(/(\d{3,4})\s*[x×]\s*(\d{3,4})/i);
 
-  let label = quality || "Default";
+  if (!match) {
+    return { width: 0, height: 0 };
+  }
 
-  if (normalized.includes("4320")) label = "4320p (8K)";
-  else if (normalized.includes("2160")) label = "2160p (4K)";
-  else if (normalized.includes("1440")) label = "1440p (2K)";
-  else if (normalized.includes("1080")) label = "1080p (Full HD)";
-  else if (normalized.includes("720")) label = "720p (HD)";
-  else if (normalized.includes("480")) label = "480p (SD)";
-  else if (normalized.includes("360")) label = "360p";
-  else if (normalized.includes("240")) label = "240p";
+  const width = Number(match[1]);
+  const height = Number(match[2]);
 
-  const extension = ext ? String(ext).toUpperCase() : "";
-
-  return extension ? `${label} · ${extension}` : label;
+  return {
+    width: Number.isFinite(width) ? width : 0,
+    height: Number.isFinite(height) ? height : 0,
+  };
 }
 
-function getPrimaryQuality(quality = "") {
+function getResolutionValue(media = {}, fallbackQuality = "") {
+  const quality = String(fallbackQuality || media?.quality || "");
+  const qualityDims = getDimensionsFromQualityText(quality);
+
+  const width = Number(media?.width || qualityDims.width || 0);
+  const height = Number(media?.height || qualityDims.height || 0);
+
+  if (width > 0 && height > 0) {
+    /**
+     * Use the shorter side as the quality number.
+     * 1920x1080 and 1080x1920 both become 1080p.
+     */
+    return Math.min(width, height);
+  }
+
+  const numericMatch = quality.match(/(4320|2160|1440|1080|720|480|360|240)/);
+
+  if (numericMatch) {
+    return Number(numericMatch[1]);
+  }
+
+  const normalized = quality.toLowerCase();
+
+  if (normalized.includes("4k") || normalized.includes("uhd")) return 2160;
+  if (normalized.includes("2k") || normalized.includes("qhd")) return 1440;
+  if (normalized.includes("full hd") || normalized.includes("fhd")) return 1080;
+  if (normalized.includes("hd")) return 720;
+  if (normalized.includes("sd")) return 480;
+
+  return 0;
+}
+
+function getResolutionLabel(value = 0) {
+  const resolution = Number(value || 0);
+
+  if (resolution >= 4320) return "4320p (8K)";
+  if (resolution >= 2160) return "2160p (4K)";
+  if (resolution >= 1440) return "1440p (2K)";
+  if (resolution >= 1080) return "1080p (Full HD)";
+  if (resolution >= 720) return "720p (HD)";
+  if (resolution >= 480) return "480p (SD)";
+  if (resolution >= 360) return "360p";
+  if (resolution >= 240) return "240p";
+
+  return "";
+}
+
+function getPrimaryQuality(quality = "", media = {}) {
+  const resolution = getResolutionValue(media, quality);
+
+  if (resolution >= 4320) return "8K";
+  if (resolution >= 2160) return "4K";
+  if (resolution >= 1440) return "2K";
+  if (resolution >= 1080) return "1080p";
+  if (resolution >= 720) return "HD";
+  if (resolution >= 480) return "SD";
+  if (resolution >= 360) return "360p";
+  if (resolution >= 240) return "240p";
+
   const normalized = String(quality || "").toLowerCase();
 
-  if (normalized.includes("4320")) return "4320p";
-  if (normalized.includes("2160")) return "2160p";
-  if (normalized.includes("1440")) return "1440p";
-  if (normalized.includes("1080")) return "1080p";
-  if (normalized.includes("720")) return "720p";
-  if (normalized.includes("480")) return "480p";
-  if (normalized.includes("360")) return "360p";
-  if (normalized.includes("240")) return "240p";
+  if (normalized.includes("audio")) return "Audio";
+  if (normalized.includes("hd")) return "HD";
+  if (normalized.includes("sd")) return "SD";
 
   return quality || "Default";
 }
+
+function getPrettyQuality(quality = "", ext = "", media = {}) {
+  const resolution = getResolutionValue(media, quality);
+  const resolutionLabel = getResolutionLabel(resolution);
+  const normalized = String(quality || "").toLowerCase();
+
+  let label = resolutionLabel || quality || "Default";
+
+  if (!resolutionLabel) {
+    if (normalized.includes("audio")) label = "Audio";
+    else if (normalized.includes("hd")) label = "720p (HD)";
+    else if (normalized.includes("sd")) label = "480p (SD)";
+  }
+
+  const badges = [];
+
+  if (normalized.includes("no_watermark") || normalized.includes("no watermark")) {
+    badges.push("No watermark");
+  } else if (normalized.includes("watermark")) {
+    badges.push("Watermark");
+  }
+
+  const extension = ext ? String(ext).toUpperCase() : "";
+
+  return [label, extension, ...badges].filter(Boolean).join(" · ");
+}
+
 
 function getFixedPreviewUrl(originalUrl) {
   if (!originalUrl) return "";
@@ -538,7 +615,8 @@ function DownloadPreviewPage() {
 
       const prettyQuality = getPrettyQuality(
         selectedMedia?.quality,
-        selectedMedia?.ext
+        selectedMedia?.ext,
+        selectedMedia
       );
 
       const originalUrl = videoInfo?.webpage_url || url;
@@ -986,7 +1064,7 @@ function DownloadPreviewPage() {
 
               {isDownloading
                 ? "Downloading..."
-                : `Download ${getPrimaryQuality(selectedMedia?.quality)}`}
+                : `Download ${getPrimaryQuality(selectedMedia?.quality, selectedMedia)}`}
             </button>
 
             <div className="mt-3 flex items-center justify-center gap-2 text-[13px] font-medium text-[var(--text-muted)]">
@@ -1100,7 +1178,8 @@ function DownloadPreviewPage() {
 
                     const prettyQuality = getPrettyQuality(
                       option.quality,
-                      option.ext
+                      option.ext,
+                      option
                     );
 
                     return (
