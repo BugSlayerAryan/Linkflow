@@ -3310,6 +3310,7 @@ function DownloadPreviewPage() {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [naturalAspectRatio, setNaturalAspectRatio] = useState("");
   const [activeDownload, setActiveDownload] = useState(null);
+  const [youtubeDownloadHelp, setYoutubeDownloadHelp] = useState(null);
 
   const videoOptions = videoInfo?.video || [];
   const audioOptions = videoInfo?.audio || [];
@@ -3341,6 +3342,22 @@ function DownloadPreviewPage() {
   const stopProcessingTimer = () => {
     clearInterval(processingTimerRef.current);
     processingTimerRef.current = null;
+  };
+
+  const showYoutubePlayerDownloadHelp = (media) => {
+    if (videoRef.current) {
+      videoRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      videoRef.current.focus?.();
+    }
+
+    setYoutubeDownloadHelp({
+      quality: media?.quality || "360p",
+      title: videoInfo?.title || "this YouTube video",
+    });
   };
 
   const resetPreviewMedia = () => {
@@ -3780,37 +3797,49 @@ function DownloadPreviewPage() {
           ? getBrowserDirectMuxedVideo(videoInfo, selectedMedia)
           : null;
 
-      if (youtubeBrowserDirectVideo?.url && youtubeBrowserDirectVideo?.hasAudio === true) {
+      const shouldUseNativeYoutubePlayerDownload =
+        format === "video" &&
+        isYoutubePlatform(videoInfo) &&
+        (isGoogleVideoUrl(selectedMedia?.url) || youtubeBrowserDirectVideo?.url);
+
+      if (shouldUseNativeYoutubePlayerDownload) {
         stopProcessingTimer();
         removeActiveDownload(downloadId);
 
-        triggerBrowserDirectDownload(
-          youtubeBrowserDirectVideo.url,
-          getDownloadFileName(videoInfo?.title, "video")
-        );
+        const helperMedia = youtubeBrowserDirectVideo || selectedMedia;
+
+        /**
+         * If user selected a silent 1080p/720p stream, switch preview to the
+         * available muxed stream with audio, normally 360p / itag=18.
+         */
+        if (
+          helperMedia?.url &&
+          selectedMedia?.url !== helperMedia.url
+        ) {
+          setSelectedMedia(helperMedia);
+        }
 
         addRecentDownload({
           ...downloadMeta,
-          url: youtubeBrowserDirectVideo.url,
-          previewUrl: youtubeBrowserDirectVideo.url,
-          quality: youtubeBrowserDirectVideo.quality || downloadMeta.quality,
-          size: youtubeBrowserDirectVideo.size || downloadMeta.size,
-          width: youtubeBrowserDirectVideo.width || downloadMeta.width,
-          height: youtubeBrowserDirectVideo.height || downloadMeta.height,
-          aspectRatio:
-            youtubeBrowserDirectVideo.aspectRatio || downloadMeta.aspectRatio,
-          hasAudio: true,
+          url: helperMedia?.url || selectedMedia?.url || "",
+          previewUrl: helperMedia?.url || selectedMedia?.url || "",
+          quality: helperMedia?.quality || downloadMeta.quality,
+          size: helperMedia?.size || downloadMeta.size,
+          width: helperMedia?.width || downloadMeta.width,
+          height: helperMedia?.height || downloadMeta.height,
+          aspectRatio: helperMedia?.aspectRatio || downloadMeta.aspectRatio,
+          hasAudio: helperMedia?.hasAudio === true,
           progress: 100,
-          status: "Opened browser direct download",
+          status: "Use player 3-dot menu to download",
         });
 
         setActiveDownload(null);
         setIsDownloading(false);
 
-        toast.success(
-          `Opened ${
-            youtubeBrowserDirectVideo.quality || "YouTube"
-          } video with audio using browser direct download.`
+        showYoutubePlayerDownloadHelp(helperMedia || selectedMedia);
+
+        toast.info(
+          "Use the video player 3-dot menu to download this YouTube video with audio."
         );
 
         return;
@@ -3852,10 +3881,9 @@ function DownloadPreviewPage() {
             stopProcessingTimer();
             removeActiveDownload(downloadId);
 
-            triggerBrowserDirectDownload(
-              muxedYoutubeFallback.url,
-              getDownloadFileName(videoInfo?.title, "video")
-            );
+            if (selectedMedia?.url !== muxedYoutubeFallback.url) {
+              setSelectedMedia(muxedYoutubeFallback);
+            }
 
             addRecentDownload({
               ...downloadMeta,
@@ -3869,16 +3897,18 @@ function DownloadPreviewPage() {
                 muxedYoutubeFallback.aspectRatio || downloadMeta.aspectRatio,
               hasAudio: true,
               progress: 100,
-              status: "Opened browser direct download",
+              status: "Use player 3-dot menu to download",
             });
 
             setActiveDownload(null);
             setIsDownloading(false);
 
+            showYoutubePlayerDownloadHelp(muxedYoutubeFallback);
+
             toast.info(
-              `Server download was blocked. Opened ${
+              `Server download was blocked. Use the video player 3-dot menu to download ${
                 muxedYoutubeFallback.quality || "360p"
-              } YouTube video with audio directly in browser.`
+              } with audio.`
             );
 
             return;
@@ -4483,6 +4513,84 @@ function DownloadPreviewPage() {
           </aside>
         </div>
       </section>
+
+      {youtubeDownloadHelp && (
+        <div className="fixed inset-0 z-[90] grid place-items-center bg-black/65 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-[520px] overflow-hidden rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface)] shadow-[0_28px_100px_rgba(2,6,23,0.45)]">
+            <div className="border-b border-[var(--border-subtle)] p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-500">
+                    YouTube direct download
+                  </p>
+
+                  <h2 className="mt-2 text-[24px] font-bold tracking-[-0.03em] text-[var(--text-heading)]">
+                    Use the video player’s 3-dot menu
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setYoutubeDownloadHelp(null)}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] text-[var(--text-body)] hover:bg-[var(--surface-hover)]"
+                  aria-label="Close instructions"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+                Azure server is blocked by YouTube for this signed link, but the
+                preview player can download it directly. Stay on this page and
+                use the player controls.
+              </p>
+            </div>
+
+            <div className="space-y-3 p-5">
+              {[
+                ["1", "Make sure the video preview is visible above."],
+                ["2", "Tap the ⋮ 3-dot button at the bottom-right of the video player."],
+                ["3", `Choose “Download”. This downloads ${youtubeDownloadHelp.quality || "360p"} with audio.`],
+              ].map(([number, text]) => (
+                <div
+                  key={number}
+                  className="flex gap-3 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3"
+                >
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-violet-600 text-sm font-bold text-white">
+                    {number}
+                  </span>
+
+                  <p className="text-sm leading-6 text-[var(--text-body)]">
+                    {text}
+                  </p>
+                </div>
+              ))}
+
+              <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-3 text-sm leading-6 text-amber-600">
+                Do not use the new tab page download. Use the 3-dot menu inside
+                the preview player shown on this page.
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setYoutubeDownloadHelp(null);
+
+                  if (videoRef.current) {
+                    videoRef.current.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }
+                }}
+                className="mt-2 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.24)]"
+              >
+                Got it — show me the video player
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeDownload && (
         <div className="fixed bottom-4 left-1/2 z-[80] w-[calc(100%-24px)] max-w-[620px] -translate-x-1/2 sm:bottom-6">
