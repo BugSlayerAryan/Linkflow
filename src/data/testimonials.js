@@ -1,38 +1,53 @@
+import userOne from "../assets/images/testimonials/person-1.jpg";
+import userTwo from "../assets/images/testimonials/person-2.jpg";
+import userThree from "../assets/images/testimonials/person-3.webp";
+import userFour from "../assets/images/testimonials/person-4.jpg";
+import userFive from "../assets/images/testimonials/person-5.jpg";
+
 export const testimonials = [
   {
-    id: 1,
-    name: "Alex Morgan",
+    name: "Maya Singh",
     role: "Content Creator",
-    avatar: "AM",
     rating: 5,
-    text: "The fastest and easiest video downloader I’ve ever used. Highly recommended!",
-    gradient: "from-orange-400 via-rose-500 to-fuchsia-600",
+    avatar: "M",
+    image: userOne,
+    gradient: "from-violet-500 to-fuchsia-500",
+    text: "SnapDL makes online video downloads fast and simple. I use it to save YouTube videos and social media clips in MP4 without installing extra software.",
   },
   {
-    id: 2,
-    name: "Sophia Reynolds",
-    role: "Video Editor",
-    avatar: "SR",
-    rating: 5,
-    text: "Amazing quality downloads, even in 4K. Works perfectly on all platforms.",
-    gradient: "from-fuchsia-400 via-purple-500 to-violet-600",
-  },
-  {
-    id: 3,
-    name: "James Carter",
-    role: "Music Producer",
-    avatar: "JC",
-    rating: 5,
-    text: "MP3 conversion is super fast and the audio quality is excellent.",
-    gradient: "from-blue-400 via-indigo-500 to-violet-600",
-  },
-  {
-    id: 4,
-    name: "Emma Wilson",
+    name: "Aarav Sharma",
     role: "Social Media Manager",
-    avatar: "EW",
     rating: 5,
-    text: "Clean interface, quick downloads, and no confusing steps. Exactly what I needed.",
-    gradient: "from-emerald-400 via-cyan-500 to-blue-600",
+    avatar: "A",
+    image: userTwo,
+    gradient: "from-blue-500 to-cyan-400",
+    text: "The interface is clean, quick, and easy to use. Downloading Instagram Reels and Facebook videos in MP4 feels smooth on both mobile and desktop.",
+  },
+  {
+    name: "Neha Kapoor",
+    role: "Student",
+    rating: 5,
+    avatar: "N",
+    image: userThree,
+    gradient: "from-pink-500 to-orange-400",
+    text: "I like that SnapDL supports MP4 and MP3 formats. It is a fast browser-based video downloader for saving useful videos and audio online.",
+  },
+  {
+    name: "Rohan Mehta",
+    role: "Digital Marketer",
+    rating: 5,
+    avatar: "R",
+    image: userFour,
+    gradient: "from-emerald-500 to-teal-400",
+    text: "SnapDL helps me download Facebook Reels, Instagram videos, and X/Twitter clips quickly. It is simple, secure, and requires no sign up.",
+  },
+  {
+    name: "Kabir Verma",
+    role: "Video Editor",
+    rating: 5,
+    avatar: "K",
+    image: userFive,
+    gradient: "from-amber-500 to-rose-500",
+    text: "For quick MP4 video downloads and MP3 audio saving, SnapDL feels reliable and lightweight. It works directly in the browser and saves time every day.",
   },
 ];
