@@ -1,5 +1,5 @@
 import Navbar from "../components/layout/Navbar";
-import YoutubeHerosection from "../components/Youtube/YoutubeHerosection";
+import YoutubeHerosection from "../components/Youtube/YoutubeHeroSection";
 import YoutubeFeaturesSection from "../components/Youtube/YoutubeFeaturesSection";
 import YoutubeHowItWorks from "../components/Youtube/YoutubeHowItWorks";
 import YoutubeFormatsSection from "../components/Youtube/YoutubeFormatsSection";

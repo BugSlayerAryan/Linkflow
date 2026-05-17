@@ -1,5 +1,5 @@
 import Navbar from "../components/layout/Navbar";
-import FacebookHerosection from "../components/facebook/FacebookHeroSection";
+import FacebookHerosection from "../components/Facebook/FacebookHeroSection";
 import FacebookFeaturesSection from "../components/Facebook/FacebookFeaturesSection";
 import FacebookHowItWorks from "../components/Facebook/FacebookHowItWorks";
 import FacebookFormatsSection from "../components/Facebook/FacebookFormatsSection";
