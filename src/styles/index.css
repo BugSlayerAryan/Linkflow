@@ -1025,3 +1025,140 @@ html.dark .theme-facebook-hero-light,
 html.dark .theme-x-hero-light {
   opacity: 0;
 }
+
+
+
+
+
+
+
+
+/* Platform Navbar Backgrounds */
+.theme-youtube-nav-dark,
+.theme-youtube-nav-light,
+.theme-instagram-nav-dark,
+.theme-instagram-nav-light,
+.theme-facebook-nav-dark,
+.theme-facebook-nav-light,
+.theme-x-nav-dark,
+.theme-x-nav-light {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: opacity var(--theme-transition);
+  will-change: opacity;
+}
+
+/* YouTube Navbar */
+.theme-youtube-nav-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 0, 0, 0.18), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(244, 63, 94, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(9, 5, 10, 0.94), rgba(2, 6, 23, 0.86));
+}
+
+.theme-youtube-nav-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 0, 0, 0.12), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(244, 63, 94, 0.08), transparent 34%),
+    linear-gradient(
+      180deg,
+      rgba(255, 250, 250, 0.94),
+      rgba(255, 241, 242, 0.84)
+    );
+}
+
+/* Instagram Navbar */
+.theme-instagram-nav-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(225, 48, 108, 0.18), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(252, 175, 69, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(9, 5, 13, 0.94), rgba(2, 6, 23, 0.86));
+}
+
+.theme-instagram-nav-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(225, 48, 108, 0.12), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(252, 175, 69, 0.12), transparent 34%),
+    linear-gradient(
+      180deg,
+      rgba(255, 247, 251, 0.94),
+      rgba(255, 241, 247, 0.84)
+    );
+}
+
+/* Facebook Navbar */
+.theme-facebook-nav-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(24, 119, 242, 0.2), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(2, 7, 22, 0.94), rgba(2, 6, 23, 0.86));
+}
+
+.theme-facebook-nav-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(24, 119, 242, 0.13), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.1), transparent 34%),
+    linear-gradient(
+      180deg,
+      rgba(248, 251, 255, 0.94),
+      rgba(239, 246, 255, 0.84)
+    );
+}
+
+/* X / Twitter Navbar */
+.theme-x-nav-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.1), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.96), rgba(0, 0, 0, 0.88));
+}
+
+.theme-x-nav-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(15, 23, 42, 0.08), transparent 34%),
+    radial-gradient(circle at 78% 0%, rgba(14, 165, 233, 0.1), transparent 34%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.94),
+      rgba(248, 250, 252, 0.86)
+    );
+}
+
+/* Platform navbar light/dark visibility */
+html.light .theme-youtube-nav-dark,
+html.light .theme-instagram-nav-dark,
+html.light .theme-facebook-nav-dark,
+html.light .theme-x-nav-dark {
+  opacity: 0;
+}
+
+html.light .theme-youtube-nav-light,
+html.light .theme-instagram-nav-light,
+html.light .theme-facebook-nav-light,
+html.light .theme-x-nav-light {
+  opacity: 1;
+}
+
+html.dark .theme-youtube-nav-dark,
+html.dark .theme-instagram-nav-dark,
+html.dark .theme-facebook-nav-dark,
+html.dark .theme-x-nav-dark {
+  opacity: 1;
+}
+
+html.dark .theme-youtube-nav-light,
+html.dark .theme-instagram-nav-light,
+html.dark .theme-facebook-nav-light,
+html.dark .theme-x-nav-light {
+  opacity: 0;
+}
