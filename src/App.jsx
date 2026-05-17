@@ -13,6 +13,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import DMCAPage from "./pages/DMCAPage";
 import ContactPage from "./pages/ContactPage";
+import AboutPage from "./pages/AboutPage";
 
 import DownloadPreviewPage from "./pages/DownloadPreviewPage";
 import DownloadsPage from "./pages/DownloadsPage";
@@ -41,7 +42,9 @@ function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/dmca" element={<DMCAPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/about" element={<AboutPage />} />
 
+          
           <Route path="/download" element={<DownloadPreviewPage />} />
           <Route path="/downloads" element={<DownloadsPage />} />
           <Route path="/downloads/player/:id" element={<DownloadPlayerPage />} />

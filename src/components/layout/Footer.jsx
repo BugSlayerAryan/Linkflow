@@ -25,7 +25,7 @@ const legalLinks = [
 const legalColumnLinks = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
-  { label: "Refund Policy", href: "/terms" },
+  { label: "About Us", href: "/about" },
   { label: "DMCA", href: "/dmca" },
 ];
 
