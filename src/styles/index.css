@@ -1162,3 +1162,124 @@ html.dark .theme-facebook-nav-light,
 html.dark .theme-x-nav-light {
   opacity: 0;
 }
+
+
+
+
+
+
+
+
+/* Platform Footer Backgrounds */
+.theme-youtube-footer-dark,
+.theme-youtube-footer-light,
+.theme-instagram-footer-dark,
+.theme-instagram-footer-light,
+.theme-facebook-footer-dark,
+.theme-facebook-footer-light,
+.theme-x-footer-dark,
+.theme-x-footer-light {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: opacity var(--theme-transition);
+  will-change: opacity;
+}
+
+/* YouTube Footer */
+.theme-youtube-footer-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 0, 0, 0.16), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(244, 63, 94, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(9, 5, 10, 0.96), rgba(2, 6, 23, 1));
+}
+
+.theme-youtube-footer-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 0, 0, 0.1), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(244, 63, 94, 0.08), transparent 34%),
+    linear-gradient(180deg, #fffafa 0%, #fff1f2 52%, #ffffff 100%);
+}
+
+/* Instagram Footer */
+.theme-instagram-footer-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(225, 48, 108, 0.16), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(252, 175, 69, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(9, 5, 13, 0.96), rgba(2, 6, 23, 1));
+}
+
+.theme-instagram-footer-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(225, 48, 108, 0.1), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(252, 175, 69, 0.12), transparent 34%),
+    linear-gradient(180deg, #fff7fb 0%, #fff1f7 52%, #ffffff 100%);
+}
+
+/* Facebook Footer */
+.theme-facebook-footer-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(24, 119, 242, 0.18), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(2, 7, 22, 0.96), rgba(2, 6, 23, 1));
+}
+
+.theme-facebook-footer-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(24, 119, 242, 0.11), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.09), transparent 34%),
+    linear-gradient(180deg, #f8fbff 0%, #eff6ff 52%, #ffffff 100%);
+}
+
+/* X / Twitter Footer */
+.theme-x-footer-dark {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.09), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.98), rgba(0, 0, 0, 1));
+}
+
+.theme-x-footer-light {
+  opacity: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(15, 23, 42, 0.07), transparent 34%),
+    radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.09), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 52%, #eef2f7 100%);
+}
+
+/* Platform footer light/dark visibility */
+html.light .theme-youtube-footer-dark,
+html.light .theme-instagram-footer-dark,
+html.light .theme-facebook-footer-dark,
+html.light .theme-x-footer-dark {
+  opacity: 0;
+}
+
+html.light .theme-youtube-footer-light,
+html.light .theme-instagram-footer-light,
+html.light .theme-facebook-footer-light,
+html.light .theme-x-footer-light {
+  opacity: 1;
+}
+
+html.dark .theme-youtube-footer-dark,
+html.dark .theme-instagram-footer-dark,
+html.dark .theme-facebook-footer-dark,
+html.dark .theme-x-footer-dark {
+  opacity: 1;
+}
+
+html.dark .theme-youtube-footer-light,
+html.dark .theme-instagram-footer-light,
+html.dark .theme-facebook-footer-light,
+html.dark .theme-x-footer-light {
+  opacity: 0;
+}
