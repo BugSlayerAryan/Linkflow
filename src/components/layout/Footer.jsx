@@ -30,8 +30,10 @@ const legalColumnLinks = [
 ];
 
 const supportLinks = [
-  { label: "Help Center", href: "/contact" },
-  { label: "Report Issue", href: "/contact" },
+  {label: "Contact Us", href: "/contact"},
+  { label: "Help Center", href: "/help" },
+  { label: "Report Issue", href: "/report" },
+  { label: "Feedback", href: "/feedback" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "DMCA", href: "/dmca" },
 ];
@@ -75,8 +77,10 @@ const footerConfig = {
       {
         title: "Support",
         links: [
-          { label: "Help Center", href: "/contact" },
-          { label: "Report Issue", href: "/contact" },
+          { label: "Contact Us", href: "/contact" },
+          { label: "Help Center", href: "/help" },
+          { label: "Report Issue", href: "/report" },
+          { label: "Feedback", href: "/feedback" },
           { label: "FAQ", href: "#faq" },
           { label: "Start Download", href: "#start-download" },
         ],

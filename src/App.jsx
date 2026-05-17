@@ -14,6 +14,9 @@ import TermsPage from "./pages/TermsPage";
 import DMCAPage from "./pages/DMCAPage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
+import HelpPage from "./pages/HelpPage";
+import ReportPage from "./pages/ReportPage";
+import FeedbackPage from "./pages/FeedbackPage";
 
 import DownloadPreviewPage from "./pages/DownloadPreviewPage";
 import DownloadsPage from "./pages/DownloadsPage";
@@ -43,6 +46,9 @@ function App() {
           <Route path="/dmca" element={<DMCAPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/report" element={<ReportPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
 
           
           <Route path="/download" element={<DownloadPreviewPage />} />
