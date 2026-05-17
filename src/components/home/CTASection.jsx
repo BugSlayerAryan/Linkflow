@@ -1,7 +1,7 @@
 import { BadgeCheck, Download } from "lucide-react";
 import ctaRocket from "../../assets/images/cta-rocket.png";
 
-const benefits = ["No Sign Up", "No Limits", "100% Free"];
+const benefits = ["No Sign Up", "No App Install", "Free Online Tool"];
 
 const transitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
@@ -9,15 +9,16 @@ const transitionClass =
 function CTASection() {
   return (
     <section
-      id="contact"
-      className={`relative overflow-hidden px-5 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-14 xl:px-20 ${transitionClass}`}
+      id="start-download"
+      aria-labelledby="cta-title"
+      className={`theme-section relative overflow-hidden px-5 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-14 xl:px-20 ${transitionClass}`}
     >
-      <div className="theme-cta-dark" />
-      <div className="theme-cta-light" />
+      <div className="theme-layer theme-cta-dark" />
+      <div className="theme-layer theme-cta-light" />
 
-      <div className="pointer-events-none absolute left-1/2 top-8 h-44 w-[300px] -translate-x-1/2 rounded-full bg-violet-500/12 blur-[85px] sm:w-[520px]" />
+      <div className="pointer-events-none absolute left-1/2 top-8 z-[1] h-44 w-[300px] -translate-x-1/2 rounded-full bg-violet-500/12 blur-[85px] sm:w-[520px]" />
 
-      <div className="relative mx-auto max-w-[1320px]">
+      <div className="relative z-10 mx-auto max-w-[1320px]">
         <div
           className={`relative overflow-hidden rounded-[30px] border border-[var(--cta-border)] bg-[var(--cta-shell-bg)] p-px shadow-[0_24px_90px_var(--cta-shadow)] ${transitionClass}`}
         >
@@ -36,26 +37,39 @@ function CTASection() {
 
                   <img
                     src={ctaRocket}
-                    alt="Rocket illustration"
+                    alt="SnapDL online video downloader for MP4 and MP3 downloads"
+                    loading="lazy"
                     className="relative z-10 w-[130px] drop-shadow-[0_20px_40px_rgba(124,58,237,0.28)] sm:w-[150px] lg:w-[165px]"
                   />
                 </div>
               </div>
 
               <div className="text-center lg:text-left">
-                <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.03em] text-[var(--cta-title)] sm:text-[34px] lg:text-[40px]">
-                  Start Downloading Now
-                </h2>
+                <p className="mb-2 inline-flex rounded-full border border-[var(--badge-border)] bg-[var(--badge-bg)] px-3 py-1.5 text-[11px] font-semibold text-[var(--badge-text)]">
+                  Free Online Video Downloader
+                </p>
 
-                <p className="mx-auto mt-3 max-w-[640px] text-[14px] leading-6 text-[var(--cta-body)] sm:text-[15px] sm:leading-7 lg:mx-0">
-                  Join millions of users who trust LinkFlow for fast, secure and
-                  unlimited downloads.
+<h2
+  id="cta-title"
+  className="text-[28px] font-semibold leading-tight tracking-[-0.03em] text-[var(--cta-title)] sm:text-[34px] lg:text-[40px]"
+>
+  Online Video{" "}
+  <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
+    Downloader
+  </span>
+</h2>
+
+                <p className="mx-auto mt-3 max-w-[660px] text-[14px] leading-6 text-[var(--cta-body)] sm:text-[15px] sm:leading-7 lg:mx-0">
+                  Paste a video link from YouTube, Instagram, Facebook,
+                  X/Twitter, TikTok, or other supported websites and save videos
+                  or audio online with SnapDL.
                 </p>
               </div>
 
               <div className="mx-auto flex w-full max-w-[340px] flex-col items-center gap-3.5 lg:mx-0 lg:w-auto lg:max-w-none lg:items-end">
                 <a
                   href="#hero"
+                  aria-label="Start downloading videos online with SnapDL"
                   className={`group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cta-button-bg)] px-6 py-3 text-sm font-semibold text-[var(--cta-button-text)] shadow-[0_16px_40px_var(--cta-button-shadow)] hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 sm:w-auto sm:min-w-[250px] ${transitionClass}`}
                 >
                   <Download className="h-4 w-4 transition-transform duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0.5" />

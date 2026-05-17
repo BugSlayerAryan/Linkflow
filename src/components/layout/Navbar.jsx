@@ -7,7 +7,7 @@ const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Formats", href: "#formats" },
   { label: "FAQ", href: "#faq" },
-  { label: "Contact", href: "#contact" },
+  { label: "Start Download", href: "#start-download" },
 ];
 
 const transitionClass =
@@ -21,7 +21,7 @@ function applyTheme(theme, shouldSave = true) {
   root.setAttribute("data-theme", theme);
 
   if (shouldSave) {
-    localStorage.setItem("linkflow-theme", theme);
+    localStorage.setItem("snapdl-theme", theme);
   }
 }
 
@@ -30,7 +30,11 @@ function Navbar() {
   const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("linkflow-theme") || "dark";
+    const savedTheme =
+      localStorage.getItem("snapdl-theme") ||
+      localStorage.getItem("linkflow-theme") ||
+      "dark";
+
     applyTheme(savedTheme, false);
     setTheme(savedTheme);
   }, []);
@@ -97,11 +101,14 @@ function Navbar() {
       <div className="theme-layer theme-nav-dark" />
       <div className="theme-layer theme-nav-light" />
 
-      <nav className="relative z-10 mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:h-[76px] lg:px-14 xl:px-20 2xl:px-24">
+      <nav
+        aria-label="Main navigation"
+        className="relative z-10 mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:h-[76px] lg:px-14 xl:px-20 2xl:px-24"
+      >
         <a
-          href="#"
+          href="#hero"
           onClick={handleLogoClick}
-          aria-label="Go to top"
+          aria-label="Go to SnapDL homepage"
           className={`cursor-pointer ${transitionClass}`}
         >
           <Logo />
@@ -153,6 +160,7 @@ function Navbar() {
           className={`grid h-10 w-10 cursor-pointer place-items-center rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] text-[var(--logo-title)] hover:border-violet-400/35 hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] active:scale-95 lg:hidden ${transitionClass}`}
           aria-label={isOpen ? "Close mobile menu" : "Open mobile menu"}
           aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
         >
           {isOpen ? (
             <X className="h-[18px] w-[18px]" />
@@ -163,8 +171,9 @@ function Navbar() {
       </nav>
 
       <div
+        id="mobile-navigation"
         className={`relative z-10 overflow-hidden backdrop-blur-2xl lg:hidden ${transitionClass} ${
-          isOpen ? "max-h-[520px] opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[680px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="px-5 pb-5 pt-3 sm:px-8">
@@ -177,7 +186,7 @@ function Navbar() {
               </p>
 
               <span className="rounded-full border border-violet-400/20 bg-violet-500/10 px-2.5 py-1 text-[11px] font-medium text-violet-500">
-                LinkFlow
+                SnapDL
               </span>
             </div>
 
@@ -200,6 +209,36 @@ function Navbar() {
                   />
                 </a>
               ))}
+
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`mt-2 flex w-full items-center justify-between rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-[14px] font-medium text-[var(--nav-link-text)] hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] ${transitionClass}`}
+                aria-label={
+                  theme === "dark"
+                    ? "Switch to light mode"
+                    : "Switch to dark mode"
+                }
+              >
+                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                <ThemeIcon className="h-[18px] w-[18px]" />
+              </button>
+
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  className={`rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-[14px] font-medium text-[var(--nav-link-text)] hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] ${transitionClass}`}
+                >
+                  Log In
+                </button>
+
+                <button
+                  type="button"
+                  className={`rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 px-4 py-3 text-[14px] font-semibold text-white shadow-[0_10px_30px_rgba(168,85,247,0.24)] hover:brightness-110 ${transitionClass}`}
+                >
+                  Sign Up
+                </button>
+              </div>
             </div>
           </div>
         </div>

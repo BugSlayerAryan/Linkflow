@@ -9,14 +9,15 @@ const smoothTransitionClass =
 
 const stepLabels = [
   "Paste a public video URL",
-  "Preview formats instantly",
-  "Save video or audio securely",
+  "Choose MP4 or MP3 format",
+  "Download securely on any device",
 ];
 
 function HowItWorks() {
   return (
     <section
       id="how-it-works"
+      aria-labelledby="how-it-works-title"
       className={`theme-section relative overflow-hidden ${colorTransitionClass}`}
     >
       <div className="theme-layer theme-how-dark" />
@@ -32,20 +33,24 @@ function HowItWorks() {
             className={`mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-2 text-[12px] font-semibold text-violet-500 shadow-[0_14px_40px_var(--shadow-soft)] backdrop-blur-xl ${smoothTransitionClass}`}
           >
             <Sparkles className="h-3.5 w-3.5 fill-violet-400 text-violet-400" />
-            Simple 3-step workflow
+            Simple 3-step video downloader
           </div>
-
           <h2
+            id="how-it-works-title"
             className={`text-[30px] font-bold leading-tight tracking-[-0.04em] text-[var(--text-heading)] sm:text-[40px] lg:text-[46px] ${colorTransitionClass}`}
           >
-            How It Works
+            Download Videos{" "}
+            <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
+              In MP4/MP3
+            </span>
           </h2>
 
           <p
             className={`mx-auto mt-4 max-w-2xl text-[14px] leading-7 text-[var(--text-muted)] sm:text-[16px] ${colorTransitionClass}`}
           >
-            Paste a video link, preview available formats, then download your
-            selected video or audio in seconds.
+            Copy a video link from YouTube, Instagram, Facebook, X/Twitter, or a
+            supported website, preview available formats, then save your video
+            or audio file online in seconds.
           </p>
         </div>
 
@@ -128,15 +133,15 @@ function HowItWorks() {
               <h3
                 className={`text-[15px] font-semibold text-[var(--text-heading)] sm:text-[16px] ${colorTransitionClass}`}
               >
-                Smart validation before download
+                Smart link validation before download
               </h3>
 
               <p
                 className={`mt-1 text-[13px] leading-6 text-[var(--text-muted)] sm:text-[14px] ${colorTransitionClass}`}
               >
-                Empty or invalid links stay on the landing page with a toast
-                message. Valid links open the download preview page
-                automatically.
+                Empty or invalid URLs stay on the page with a helpful message.
+                Valid video links open the download preview page automatically
+                with available MP4 or MP3 options.
               </p>
             </div>
 

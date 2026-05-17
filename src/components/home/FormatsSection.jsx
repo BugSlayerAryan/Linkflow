@@ -60,7 +60,11 @@ function FormatGroup({ title, subtitle, items, type }) {
 
 function FormatsSection() {
   return (
-    <section id="formats" className="theme-section relative overflow-hidden">
+    <section
+      id="formats"
+      aria-labelledby="formats-title"
+      className="theme-section relative overflow-hidden"
+    >
       <div className="theme-layer theme-formats-dark" />
       <div className="theme-layer theme-formats-light" />
 
@@ -71,7 +75,7 @@ function FormatsSection() {
         <div className="order-2 mt-2 flex justify-center lg:order-1 lg:mt-0 lg:justify-start">
           <img
             src={formatsPreview}
-            alt="Surfer video preview"
+            alt="MP4 video downloader preview with selectable video quality and audio formats"
             className="w-full max-w-[360px] object-contain drop-shadow-[0_22px_70px_rgba(14,165,233,0.16)] min-[420px]:max-w-[400px] sm:max-w-[560px] md:max-w-[640px] lg:max-w-[700px] xl:max-w-[760px]"
           />
         </div>
@@ -80,38 +84,40 @@ function FormatsSection() {
           <div
             className={`mb-3 inline-flex rounded-full border border-[var(--badge-border)] bg-[var(--badge-bg)] px-3 py-1.5 text-[11px] font-medium text-[var(--badge-text)] sm:mb-4 sm:px-3.5 sm:text-xs ${smoothTransitionClass}`}
           >
-            Video & Audio Formats
+            MP4 & MP3 Download Formats
           </div>
 
           <h2
-            className={`mx-auto max-w-[520px] text-[28px] font-semibold leading-[1.12] tracking-[-0.02em] text-[var(--text-heading)] min-[420px]:text-[30px] sm:text-[36px] lg:mx-0 lg:text-[42px] ${colorTransitionClass}`}
+            id="formats-title"
+            className={`mx-auto max-w-[560px] text-[28px] font-semibold leading-[1.12] tracking-[-0.02em] text-[var(--text-heading)] min-[420px]:text-[30px] sm:text-[36px] lg:mx-0 lg:text-[42px] ${colorTransitionClass}`}
           >
-            Multiple Formats.
+            Download Videos In
             <br />
             <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
-              Crystal Clear Quality.
+              MP4, MP3 & 4K Quality
             </span>
           </h2>
 
           <p
-            className={`mx-auto mt-4 max-w-[560px] text-[13.5px] leading-7 text-[var(--text-muted)] sm:mt-5 sm:text-[15px] sm:leading-8 lg:mx-0 ${colorTransitionClass}`}
+            className={`mx-auto mt-4 max-w-[580px] text-[13.5px] leading-7 text-[var(--text-muted)] sm:mt-5 sm:text-[15px] sm:leading-8 lg:mx-0 ${colorTransitionClass}`}
           >
-            Choose the perfect video or audio format for every device. Download
-            clean, high-quality files with fast conversion and smooth playback.
+            Choose the best video or audio format for your device. Download
+            videos in MP4, WEBM, MOV, AVI, or MKV, and save audio in MP3, M4A,
+            AAC, OGG, or WAV with smooth playback.
           </p>
 
           <div className="mx-auto mt-6 grid max-w-[360px] gap-3 min-[520px]:max-w-none sm:mt-7 sm:grid-cols-2 sm:gap-4 lg:mx-0">
             <FormatGroup
               type="video"
-              title="Video Formats"
-              subtitle="High-quality exports"
+              title="Video Download Formats"
+              subtitle="MP4, WEBM, MOV, AVI, MKV"
               items={videoFormats}
             />
 
             <FormatGroup
               type="audio"
-              title="Audio Formats"
-              subtitle="Crisp audio extraction"
+              title="Audio Download Formats"
+              subtitle="MP3, M4A, AAC, OGG, WAV"
               items={audioFormats}
             />
           </div>
@@ -119,7 +125,7 @@ function FormatsSection() {
           <div className="mx-auto mt-5 flex max-w-[360px] flex-wrap justify-center gap-2.5 sm:mt-7 sm:max-w-none sm:justify-start sm:gap-3">
             {[
               "Up to 4K Ultra HD",
-              "High Quality Audio",
+              "MP3 Audio Download",
               "All Devices Supported",
             ].map((item) => (
               <div

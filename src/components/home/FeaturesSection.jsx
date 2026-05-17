@@ -8,7 +8,11 @@ const smoothTransitionClass =
 
 function FeaturesSection() {
   return (
-    <section id="features" className="theme-section relative overflow-hidden">
+    <section
+      id="features"
+      aria-labelledby="features-title"
+      className="theme-section relative overflow-hidden"
+    >
       <div className="theme-layer theme-features-dark" />
       <div className="theme-layer theme-features-light" />
 
@@ -17,18 +21,20 @@ function FeaturesSection() {
       <div className="relative z-10 mx-auto max-w-[1440px] px-5 py-11 sm:px-8 sm:py-14 lg:px-14 lg:py-16 xl:px-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2
+            id="features-title"
             className={`text-[27px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-heading)] sm:text-[34px] lg:text-[36px] ${colorTransitionClass}`}
           >
-            Powerful{" "}
+            Fast Video Downloader{" "}
             <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
-              Features You’ll Love
+              Features
             </span>
           </h2>
 
           <p
-            className={`mx-auto mt-3 max-w-xl text-[14px] leading-6 text-[var(--text-muted)] sm:text-[15px] ${colorTransitionClass}`}
+            className={`mx-auto mt-3 max-w-2xl text-[14px] leading-6 text-[var(--text-muted)] sm:text-[15px] ${colorTransitionClass}`}
           >
-            Everything you need to download, convert, and save videos faster.
+            Download videos from YouTube, Instagram, Facebook, X/Twitter, and
+            more in MP4 or MP3 format with fast, secure, and easy-to-use tools.
           </p>
         </div>
 

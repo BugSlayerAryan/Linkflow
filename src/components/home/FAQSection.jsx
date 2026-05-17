@@ -1,181 +1,3 @@
-// import { useState } from "react";
-// import {
-//   BadgeCheck,
-//   ChevronDown,
-//   Lock,
-//   Shield,
-//   ShieldCheck,
-// } from "lucide-react";
-
-// const faqs = [
-//   {
-//     question: "Is LinkFlow Downloader really free?",
-//     answer:
-//       "Yes. LinkFlow Downloader is free to use for basic video downloads. You can paste a supported video link and download without installing any software.",
-//   },
-//   {
-//     question: "What websites are supported?",
-//     answer:
-//       "LinkFlow supports popular platforms like YouTube, TikTok, Instagram, Facebook, Twitter/X, Vimeo, Dailymotion, and many other websites.",
-//   },
-//   {
-//     question: "Do I need to install any software?",
-//     answer:
-//       "No installation is required. LinkFlow works directly in your browser, so you can download videos on desktop, tablet, or mobile.",
-//   },
-//   {
-//     question: "Is it safe to use?",
-//     answer:
-//       "Yes. We use secure connections and do not require personal information for basic downloads. Your links are processed safely and privately.",
-//   },
-//   {
-//     question: "What formats are available?",
-//     answer:
-//       "You can download videos in popular formats like MP4 and WEBM, or extract audio in formats like MP3, M4A, AAC, OGG, and WAV.",
-//   },
-// ];
-
-// function FAQSection() {
-//   const [openIndex, setOpenIndex] = useState(0);
-
-//   const handleToggle = (index) => {
-//     setOpenIndex((currentIndex) => (currentIndex === index ? null : index));
-//   };
-
-//   return (
-//     <section
-//       id="faq"
-//       className="relative overflow-hidden border-b border-white/[0.06] bg-[#030712] px-6 py-12 sm:px-8 lg:px-14 xl:px-20"
-//     >
-//       <div className="absolute left-1/2 top-10 h-52 w-[560px] -translate-x-1/2 rounded-full bg-violet-600/8 blur-[95px]" />
-
-//       <div className="relative mx-auto max-w-[1320px]">
-//         <div className="mx-auto max-w-3xl text-center">
-//           <h2 className="text-[30px] font-semibold tracking-[-0.02em] text-white sm:text-[36px]">
-//             Frequently Asked{" "}
-//             <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-purple-500 bg-clip-text text-transparent">
-//               Questions
-//             </span>
-//           </h2>
-
-//           <p className="mt-3 text-sm leading-6 text-slate-400">
-//             Everything you need to know before using LinkFlow.
-//           </p>
-//         </div>
-
-//         <div className="mt-9 grid gap-5 rounded-[28px] border border-white/10 bg-slate-900/35 p-4 shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur lg:grid-cols-[1.05fr_0.95fr] lg:p-5">
-//           <div className="space-y-3">
-//             {faqs.map((faq, index) => {
-//               const isOpen = openIndex === index;
-
-//               return (
-//                 <div
-//                   key={faq.question}
-//                   className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
-//                     isOpen
-//                       ? "border-violet-400/25 bg-violet-500/[0.045] shadow-[0_12px_34px_rgba(124,58,237,0.1)]"
-//                       : "border-white/10 bg-[#070b19]/70 hover:border-white/15 hover:bg-slate-900/70"
-//                   }`}
-//                 >
-//                   <button
-//                     type="button"
-//                     onClick={() => handleToggle(index)}
-//                     className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
-//                     aria-expanded={isOpen}
-//                   >
-//                     <span
-//                       className={`text-[14px] font-medium leading-6 transition ${
-//                         isOpen ? "text-slate-100" : "text-slate-300"
-//                       }`}
-//                     >
-//                       {faq.question}
-//                     </span>
-
-//                     <span
-//                       className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg transition ${
-//                         isOpen
-//                           ? "bg-violet-500/10 text-violet-300"
-//                           : "bg-white/[0.03] text-slate-500"
-//                       }`}
-//                     >
-//                       <ChevronDown
-//                         className={`h-4 w-4 transition-transform duration-300 ${
-//                           isOpen ? "rotate-180" : ""
-//                         }`}
-//                       />
-//                     </span>
-//                   </button>
-
-//                   <div
-//                     className={`grid transition-all duration-300 ease-out ${
-//                       isOpen
-//                         ? "grid-rows-[1fr] opacity-100"
-//                         : "grid-rows-[0fr] opacity-0"
-//                     }`}
-//                   >
-//                     <div className="overflow-hidden">
-//                       <p className="px-4 pb-3 pr-12 text-[13px] leading-6 text-slate-400">
-//                         {faq.answer}
-//                       </p>
-//                     </div>
-//                   </div>
-//                 </div>
-//               );
-//             })}
-//           </div>
-
-//           <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#080d1e]/90 p-6 shadow-[0_16px_50px_rgba(2,6,23,0.24)]">
-//             <div className="absolute right-8 top-8 h-52 w-52 rounded-full bg-violet-600/20 blur-[70px]" />
-
-//             <div className="relative grid h-full gap-7 lg:grid-cols-[1fr_170px] lg:items-center">
-//               <div>
-//                 <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-violet-500/10 text-violet-300 shadow-[0_0_28px_rgba(139,92,246,0.26)]">
-//                   <ShieldCheck className="h-7 w-7 stroke-[1.8]" />
-//                 </div>
-
-//                 <h3 className="text-[20px] font-semibold tracking-[-0.015em] text-white">
-//                   Your Safety is Our Priority
-//                 </h3>
-
-//                 <p className="mt-3 max-w-md text-[14px] leading-7 text-slate-400">
-//                   We use advanced encryption and secure connections to ensure
-//                   your data is always protected.
-//                 </p>
-
-//                 <div className="mt-5 space-y-3">
-//                   {[
-//                     "No registration required",
-//                     "No personal data collection",
-//                     "100% secure and anonymous",
-//                   ].map((item) => (
-//                     <p
-//                       key={item}
-//                       className="flex items-center gap-2.5 text-[14px] font-medium text-slate-300"
-//                     >
-//                       <BadgeCheck className="h-[18px] w-[18px] shrink-0 text-emerald-400" />
-//                       {item}
-//                     </p>
-//                   ))}
-//                 </div>
-//               </div>
-
-//               <div className="relative mx-auto grid h-[160px] w-[160px] place-items-center rounded-[28px] border border-violet-400/20 bg-gradient-to-br from-violet-600/20 to-blue-600/10 shadow-[0_0_55px_rgba(124,58,237,0.25)] lg:mx-0">
-//                 <Shield className="h-24 w-24 text-violet-400" />
-//                 <Lock className="absolute h-10 w-10 text-white" />
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-// export default FAQSection;
-
-
-
-
 import { useState } from "react";
 import {
   BadgeCheck,
@@ -187,29 +9,34 @@ import {
 
 const faqs = [
   {
-    question: "Is LinkFlow Downloader really free?",
+    question: "Is SnapDL video downloader free to use?",
     answer:
-      "Yes. LinkFlow Downloader is free to use for basic video downloads. You can paste a supported video link and download without installing any software.",
+      "Yes. SnapDL is free to use for basic online video downloads. Paste a supported video link and download videos without installing extra software.",
   },
   {
-    question: "What websites are supported?",
+    question: "Which websites does SnapDL support?",
     answer:
-      "LinkFlow supports popular platforms like YouTube, TikTok, Instagram, Facebook, Twitter/X, Vimeo, Dailymotion, and many other websites.",
+      "SnapDL supports popular platforms like YouTube, TikTok, Instagram, Facebook, X/Twitter, Vimeo, Dailymotion, and many other supported websites.",
   },
   {
-    question: "Do I need to install any software?",
+    question: "Can I download videos in MP4 format?",
     answer:
-      "No installation is required. LinkFlow works directly in your browser, so you can download videos on desktop, tablet, or mobile.",
+      "Yes. SnapDL lets you download supported videos in MP4 and other available video formats depending on the source link.",
   },
   {
-    question: "Is it safe to use?",
+    question: "Can I convert videos to MP3 audio?",
     answer:
-      "Yes. We use secure connections and do not require personal information for basic downloads. Your links are processed safely and privately.",
+      "Yes. When audio formats are available, SnapDL can help you save supported videos as MP3, M4A, AAC, OGG, or WAV audio files.",
   },
   {
-    question: "What formats are available?",
+    question: "Do I need to install a video downloader app?",
     answer:
-      "You can download videos in popular formats like MP4 and WEBM, or extract audio in formats like MP3, M4A, AAC, OGG, and WAV.",
+      "No. SnapDL works directly in your browser, so you can download videos online on desktop, tablet, or mobile without installing an app.",
+  },
+  {
+    question: "Is SnapDL safe and private?",
+    answer:
+      "Yes. SnapDL uses secure connections and does not require personal information for basic downloads. Your links are processed safely and privately.",
   },
 ];
 
@@ -226,28 +53,31 @@ function FAQSection() {
   return (
     <section
       id="faq"
-      className={`relative overflow-hidden px-5 py-11 sm:px-8 sm:py-14 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
+      aria-labelledby="faq-title"
+      className={`theme-section relative overflow-hidden px-5 py-11 sm:px-8 sm:py-14 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
     >
-      <div className="theme-faq-dark" />
-      <div className="theme-faq-light" />
+      <div className="theme-layer theme-faq-dark" />
+      <div className="theme-layer theme-faq-light" />
 
-      <div className="pointer-events-none absolute left-1/2 top-8 h-44 w-[320px] -translate-x-1/2 rounded-full bg-violet-500/15 blur-[80px] sm:h-52 sm:w-[560px] sm:blur-[95px]" />
+      <div className="pointer-events-none absolute left-1/2 top-8 z-[1] h-44 w-[320px] -translate-x-1/2 rounded-full bg-violet-500/15 blur-[80px] sm:h-52 sm:w-[560px] sm:blur-[95px]" />
 
-      <div className="relative mx-auto max-w-[1320px]">
+      <div className="relative z-10 mx-auto max-w-[1320px]">
         <div className="mx-auto max-w-3xl text-center">
           <h2
+            id="faq-title"
             className={`text-[28px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-heading)] sm:text-[34px] lg:text-[36px] ${transitionClass}`}
           >
-            Frequently Asked{" "}
+            Online Video Downloader{" "}
             <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
-              Questions
+              FAQs
             </span>
           </h2>
 
           <p
             className={`mx-auto mt-3 max-w-xl text-[14px] leading-6 text-[var(--text-muted)] sm:text-[15px] ${transitionClass}`}
           >
-            Everything you need to know before using LinkFlow.
+            Find answers about downloading videos online, supported platforms,
+            MP4/MP3 formats, safety, and browser compatibility.
           </p>
         </div>
 
@@ -257,6 +87,8 @@ function FAQSection() {
           <div className="space-y-2.5 sm:space-y-3">
             {faqs.map((faq, index) => {
               const isOpen = openIndex === index;
+              const answerId = `faq-answer-${index}`;
+              const buttonId = `faq-button-${index}`;
 
               return (
                 <div
@@ -267,38 +99,45 @@ function FAQSection() {
                       : "border-[var(--faq-item-border)] bg-[var(--faq-item-bg)] hover:border-violet-400/25 hover:bg-[var(--faq-item-hover)]"
                   }`}
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(index)}
-                    className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left sm:gap-4 sm:px-4"
-                    aria-expanded={isOpen}
-                  >
-                    <span
-                      className={`text-[13.5px] font-medium leading-6 sm:text-[14px] ${transitionClass} ${
-                        isOpen
-                          ? "text-[var(--text-heading)]"
-                          : "text-[var(--faq-question-text)]"
-                      }`}
+                  <h3>
+                    <button
+                      id={buttonId}
+                      type="button"
+                      onClick={() => handleToggle(index)}
+                      className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left sm:gap-4 sm:px-4"
+                      aria-expanded={isOpen}
+                      aria-controls={answerId}
                     >
-                      {faq.question}
-                    </span>
-
-                    <span
-                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg sm:h-8 sm:w-8 ${transitionClass} ${
-                        isOpen
-                          ? "bg-violet-500/10 text-violet-400"
-                          : "bg-[var(--faq-chevron-bg)] text-[var(--text-soft)]"
-                      }`}
-                    >
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                          isOpen ? "rotate-180" : ""
+                      <span
+                        className={`text-[13.5px] font-medium leading-6 sm:text-[14px] ${transitionClass} ${
+                          isOpen
+                            ? "text-[var(--text-heading)]"
+                            : "text-[var(--faq-question-text)]"
                         }`}
-                      />
-                    </span>
-                  </button>
+                      >
+                        {faq.question}
+                      </span>
+
+                      <span
+                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg sm:h-8 sm:w-8 ${transitionClass} ${
+                          isOpen
+                            ? "bg-violet-500/10 text-violet-400"
+                            : "bg-[var(--faq-chevron-bg)] text-[var(--text-soft)]"
+                        }`}
+                      >
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </span>
+                    </button>
+                  </h3>
 
                   <div
+                    id={answerId}
+                    role="region"
+                    aria-labelledby={buttonId}
                     className={`grid transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
                       isOpen
                         ? "grid-rows-[1fr] opacity-100"
@@ -334,21 +173,22 @@ function FAQSection() {
                 <h3
                   className={`text-[18px] font-semibold tracking-[-0.015em] text-[var(--text-heading)] sm:text-[20px] ${transitionClass}`}
                 >
-                  Your Safety is Our Priority
+                  Safe Browser-Based Downloads
                 </h3>
 
                 <p
                   className={`mt-3 max-w-md text-[13.5px] leading-7 text-[var(--text-muted)] sm:text-[14px] ${transitionClass}`}
                 >
-                  We use advanced encryption and secure connections to ensure
-                  your data is always protected.
+                  SnapDL keeps the download flow simple and secure. You do not
+                  need to create an account or install unknown third-party apps
+                  for basic video downloads.
                 </p>
 
                 <div className="mt-5 space-y-3">
                   {[
                     "No registration required",
-                    "No personal data collection",
-                    "100% secure and anonymous",
+                    "No software installation",
+                    "Works on mobile and desktop",
                   ].map((item) => (
                     <p
                       key={item}
