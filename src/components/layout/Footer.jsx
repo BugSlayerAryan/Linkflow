@@ -16,6 +16,26 @@ const socialLinks = [
   { name: "twitter", label: "Twitter/X", href: "/x.com" },
 ];
 
+const legalLinks = [
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+  { label: "DMCA", href: "/dmca" },
+];
+
+const legalColumnLinks = [
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Refund Policy", href: "/terms" },
+  { label: "DMCA", href: "/dmca" },
+];
+
+const supportLinks = [
+  { label: "Help Center", href: "/contact" },
+  { label: "Report Issue", href: "/contact" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "DMCA", href: "/dmca" },
+];
+
 const footerConfig = {
   home: {
     footerDark: "theme-footer-dark",
@@ -50,18 +70,13 @@ const footerConfig = {
       },
       {
         title: "Legal",
-        links: [
-          { label: "Privacy Policy", href: "#" },
-          { label: "Terms of Service", href: "#" },
-          { label: "Refund Policy", href: "#" },
-          { label: "DMCA", href: "#" },
-        ],
+        links: legalColumnLinks,
       },
       {
         title: "Support",
         links: [
-          { label: "Help Center", href: "#" },
-          { label: "Report Issue", href: "#" },
+          { label: "Help Center", href: "/contact" },
+          { label: "Report Issue", href: "/contact" },
           { label: "FAQ", href: "#faq" },
           { label: "Start Download", href: "#start-download" },
         ],
@@ -111,12 +126,7 @@ const footerConfig = {
       },
       {
         title: "Support",
-        links: [
-          { label: "Help Center", href: "#" },
-          { label: "Report Issue", href: "#" },
-          { label: "Privacy Policy", href: "#" },
-          { label: "DMCA", href: "#" },
-        ],
+        links: supportLinks,
       },
     ],
   },
@@ -163,12 +173,7 @@ const footerConfig = {
       },
       {
         title: "Support",
-        links: [
-          { label: "Help Center", href: "#" },
-          { label: "Report Issue", href: "#" },
-          { label: "Privacy Policy", href: "#" },
-          { label: "DMCA", href: "#" },
-        ],
+        links: supportLinks,
       },
     ],
   },
@@ -215,12 +220,7 @@ const footerConfig = {
       },
       {
         title: "Support",
-        links: [
-          { label: "Help Center", href: "#" },
-          { label: "Report Issue", href: "#" },
-          { label: "Privacy Policy", href: "#" },
-          { label: "DMCA", href: "#" },
-        ],
+        links: supportLinks,
       },
     ],
   },
@@ -267,12 +267,7 @@ const footerConfig = {
       },
       {
         title: "Support",
-        links: [
-          { label: "Help Center", href: "#" },
-          { label: "Report Issue", href: "#" },
-          { label: "Privacy Policy", href: "#" },
-          { label: "DMCA", href: "#" },
-        ],
+        links: supportLinks,
       },
     ],
   },
@@ -365,7 +360,7 @@ function Footer() {
 
     window.setTimeout(() => {
       scrollToSection("#hero");
-    }, 120);
+    }, 260);
   };
 
   const handleSubmit = async (event) => {
@@ -538,17 +533,23 @@ function Footer() {
               </p>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px] text-[var(--footer-soft)] sm:justify-end sm:gap-x-5 sm:text-[13px]">
-                {["Privacy", "Terms", "DMCA"].map((item, index) => (
-                  <div key={item} className="inline-flex items-center gap-x-4">
+                {legalLinks.map((item, index) => (
+                  <div
+                    key={item.label}
+                    className="inline-flex items-center gap-x-4"
+                  >
                     {index !== 0 && (
                       <span className="hidden h-1 w-1 rounded-full bg-[var(--footer-dot)] sm:block" />
                     )}
 
                     <a
-                      href="#"
+                      href={item.href}
+                      onClick={(event) =>
+                        handleSmartLinkClick(event, item.href)
+                      }
                       className={`hover:text-[var(--footer-link-hover)] ${transitionClass}`}
                     >
-                      {item}
+                      {item.label}
                     </a>
                   </div>
                 ))}
