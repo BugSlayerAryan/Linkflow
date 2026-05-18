@@ -1690,7 +1690,7 @@ function DownloadPreviewPage() {
       )}
 
       {activeDownload && (
-        <div className="fixed bottom-4 left-1/2 z-[80] w-[calc(100%-24px)] max-w-[620px] -translate-x-1/2 sm:bottom-6">
+        <div className="fixed inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[9999] mx-auto max-w-[620px] sm:bottom-6">
           <div className="overflow-hidden rounded-[24px] border border-[var(--border-soft)] bg-[var(--surface)] shadow-[0_24px_90px_rgba(2,6,23,0.35)] backdrop-blur-xl">
             <div className="flex items-start gap-3 p-3.5 sm:p-4">
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-violet-500/12 text-violet-500">
