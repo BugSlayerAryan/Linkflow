@@ -8,9 +8,9 @@ const smoothTransitionClass =
   "transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 
 const stepLabels = [
-  "Paste a public video URL",
-  "Choose MP4 or MP3 format",
-  "Download securely on any device",
+  "Paste a public video link",
+  "Select MP4 or MP3 format",
+  "Download safely on any device",
 ];
 
 function HowItWorks() {
@@ -28,29 +28,30 @@ function HowItWorks() {
       <div className="pointer-events-none absolute -right-32 top-32 z-[1] h-72 w-72 rounded-full bg-fuchsia-500/10 blur-[120px]" />
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-16 lg:px-14 lg:py-20 xl:px-20">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-[860px] text-center">
           <div
-            className={`mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-2 text-[12px] font-semibold text-violet-500 shadow-[0_14px_40px_var(--shadow-soft)] backdrop-blur-xl ${smoothTransitionClass}`}
+            className={`mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-2 text-[12.5px] font-semibold text-violet-500 shadow-[0_14px_40px_var(--shadow-soft)] backdrop-blur-xl ${smoothTransitionClass}`}
           >
             <Sparkles className="h-3.5 w-3.5 fill-violet-400 text-violet-400" />
-            Simple 3-step video downloader
+            Simple 3-step online video downloader
           </div>
+
           <h2
             id="how-it-works-title"
-            className={`text-[30px] font-bold leading-tight tracking-[-0.04em] text-[var(--text-heading)] sm:text-[40px] lg:text-[46px] ${colorTransitionClass}`}
+            className={`text-[32px] font-bold leading-[1.12] tracking-[-0.04em] text-[var(--text-heading)] sm:text-[42px] lg:text-[48px] ${colorTransitionClass}`}
           >
-            Download Videos{" "}
+            Download Videos Online{" "}
             <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
               In MP4/MP3
             </span>
           </h2>
 
           <p
-            className={`mx-auto mt-4 max-w-2xl text-[14px] leading-7 text-[var(--text-muted)] sm:text-[16px] ${colorTransitionClass}`}
+            className={`mx-auto mt-4 max-w-[780px] text-[15.5px] leading-7 text-[var(--text-muted)] sm:text-[17px] sm:leading-8 lg:text-[18px] ${colorTransitionClass}`}
           >
-            Copy a video link from YouTube, Instagram, Facebook, X/Twitter, or a
-            supported website, preview available formats, then save your video
-            or audio file online in seconds.
+            Copy a video link from YouTube, Instagram, Facebook, X/Twitter, or
+            any supported website, preview available video and audio formats,
+            then save your file online in seconds.
           </p>
         </div>
 
@@ -92,13 +93,13 @@ function HowItWorks() {
                     </div>
 
                     <h3
-                      className={`text-[18px] font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-[20px] ${colorTransitionClass}`}
+                      className={`text-[19px] font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-[21px] ${colorTransitionClass}`}
                     >
                       {step.title}
                     </h3>
 
                     <p
-                      className={`mt-3 min-h-[52px] text-[13.5px] leading-6 text-[var(--text-muted)] sm:text-[14px] ${colorTransitionClass}`}
+                      className={`mt-3 min-h-[56px] text-[14px] leading-6 text-[var(--text-muted)] sm:text-[15px] sm:leading-7 ${colorTransitionClass}`}
                     >
                       {step.text}
                     </p>
@@ -109,7 +110,7 @@ function HowItWorks() {
                       <div className="flex items-start gap-2.5">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
 
-                        <p className="text-[12.5px] font-semibold leading-5 text-[var(--text-heading)]">
+                        <p className="text-[13px] font-semibold leading-5 text-[var(--text-heading)]">
                           {stepLabels[index]}
                         </p>
                       </div>
@@ -131,13 +132,13 @@ function HowItWorks() {
 
             <div className="min-w-0">
               <h3
-                className={`text-[15px] font-semibold text-[var(--text-heading)] sm:text-[16px] ${colorTransitionClass}`}
+                className={`text-[16px] font-semibold text-[var(--text-heading)] sm:text-[17px] ${colorTransitionClass}`}
               >
-                Smart link validation before download
+                Smart video link validation before download
               </h3>
 
               <p
-                className={`mt-1 text-[13px] leading-6 text-[var(--text-muted)] sm:text-[14px] ${colorTransitionClass}`}
+                className={`mt-1 text-[13.5px] leading-6 text-[var(--text-muted)] sm:text-[14.5px] ${colorTransitionClass}`}
               >
                 Empty or invalid URLs stay on the page with a helpful message.
                 Valid video links open the download preview page automatically
@@ -145,7 +146,7 @@ function HowItWorks() {
               </p>
             </div>
 
-            <div className="hidden rounded-2xl border border-violet-500/20 bg-violet-500/10 px-4 py-2 text-[12px] font-semibold text-violet-500 sm:block">
+            <div className="hidden rounded-2xl border border-violet-500/20 bg-violet-500/10 px-4 py-2 text-[12.5px] font-semibold text-violet-500 sm:block">
               Fast · Secure · Simple
             </div>
           </div>

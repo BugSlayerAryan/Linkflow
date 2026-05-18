@@ -11,7 +11,7 @@ function CTASection() {
     <section
       id="start-download"
       aria-labelledby="cta-title"
-      className={`theme-section relative overflow-hidden px-5 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-14 xl:px-20 ${transitionClass}`}
+      className={`theme-section relative overflow-hidden px-4 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
     >
       <div className="theme-layer theme-cta-dark" />
       <div className="theme-layer theme-cta-light" />
@@ -45,21 +45,25 @@ function CTASection() {
               </div>
 
               <div className="text-center lg:text-left">
-                <p className="mb-2 inline-flex rounded-full border border-[var(--badge-border)] bg-[var(--badge-bg)] px-3 py-1.5 text-[11px] font-semibold text-[var(--badge-text)]">
+                <p
+                  className={`mb-3 inline-flex rounded-full border border-[var(--badge-border)] bg-[var(--badge-bg)] px-3 py-1.5 text-[11px] font-medium text-[var(--badge-text)] sm:mb-4 sm:px-3.5 sm:text-xs ${transitionClass}`}
+                >
                   Free Online Video Downloader
                 </p>
 
-<h2
-  id="cta-title"
-  className="text-[28px] font-semibold leading-tight tracking-[-0.03em] text-[var(--cta-title)] sm:text-[34px] lg:text-[40px]"
->
-  Online Video{" "}
-  <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
-    Downloader
-  </span>
-</h2>
+                <h2
+                  id="cta-title"
+                  className={`mx-auto max-w-[560px] text-[28px] font-semibold leading-[1.12] tracking-[-0.02em] text-[var(--cta-title)] min-[420px]:text-[30px] sm:text-[36px] lg:mx-0 lg:text-[42px] ${transitionClass}`}
+                >
+                  Online Video{" "}
+                  <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
+                    Downloader
+                  </span>
+                </h2>
 
-                <p className="mx-auto mt-3 max-w-[660px] text-[14px] leading-6 text-[var(--cta-body)] sm:text-[15px] sm:leading-7 lg:mx-0">
+                <p
+                  className={`mx-auto mt-4 max-w-[580px] text-[13.5px] leading-7 text-[var(--cta-body)] sm:mt-5 sm:text-[15px] sm:leading-8 lg:mx-0 ${transitionClass}`}
+                >
                   Paste a video link from YouTube, Instagram, Facebook,
                   X/Twitter, TikTok, or other supported websites and save videos
                   or audio online with SnapDL.
@@ -70,13 +74,13 @@ function CTASection() {
                 <a
                   href="#hero"
                   aria-label="Start downloading videos online with SnapDL"
-                  className={`group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cta-button-bg)] px-6 py-3 text-sm font-semibold text-[var(--cta-button-text)] shadow-[0_16px_40px_var(--cta-button-shadow)] hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 sm:w-auto sm:min-w-[250px] ${transitionClass}`}
+                  className={`group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--cta-button-bg)] px-6 py-3 text-[13.5px] font-semibold text-[var(--cta-button-text)] shadow-[0_16px_40px_var(--cta-button-shadow)] hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 sm:w-auto sm:min-w-[250px] sm:text-[14px] ${transitionClass}`}
                 >
                   <Download className="h-4 w-4 transition-transform duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0.5" />
                   Start Free Download
                 </a>
 
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12.5px] font-semibold text-[var(--cta-benefit-text)] lg:justify-end">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11.5px] font-medium text-[var(--cta-benefit-text)] sm:text-[12.5px] lg:justify-end">
                   {benefits.map((item, index) => (
                     <span
                       key={item}

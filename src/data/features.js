@@ -11,31 +11,31 @@ export const features = [
   {
     icon: Bolt,
     title: "Lightning Fast",
-    text: "Ultra-fast servers for blazing downloads.",
+    text: "Fast online video downloads in seconds.",
   },
   {
     icon: BadgeCheck,
     title: "HD / 4K Quality",
-    text: "Download in multiple qualities up to 4K Ultra HD.",
+    text: "Save videos in HD, Full HD, and 4K quality.",
   },
   {
     icon: Music,
     title: "MP3 Conversion",
-    text: "Extract high-quality audio from any video.",
+    text: "Convert videos to high-quality MP3 audio.",
   },
   {
     icon: ShieldCheck,
     title: "No Watermark",
-    text: "Get clean, watermark-free videos every time.",
+    text: "Download clean videos without watermarks.",
   },
   {
     icon: InfinityIcon,
     title: "Unlimited Downloads",
-    text: "Download as much as you want. No limits.",
+    text: "Free unlimited downloads with no hidden limits.",
   },
   {
     icon: Lock,
     title: "Secure & Private",
-    text: "Your data is 100% private and always secure.",
+    text: "Safe, private, and secure video downloading.",
   },
 ];

@@ -183,7 +183,7 @@ function PreparingOverlay({ progress, loadingText }) {
               <Sparkles className="h-4 w-4 shrink-0 fill-violet-400 text-violet-400" />
             </div>
 
-            <p className="mt-1.5 text-[13.5px] leading-6 text-slate-600 dark:text-slate-300">
+            <p className="mt-1.5 text-[14px] leading-6 text-slate-600 dark:text-slate-300">
               Fetching preview, title, video formats, and audio formats.
             </p>
           </div>
@@ -213,7 +213,7 @@ function PreparingOverlay({ progress, loadingText }) {
             return (
               <div
                 key={step}
-                className={`rounded-2xl border px-3 py-2.5 text-center text-[11px] font-semibold ${
+                className={`rounded-2xl border px-3 py-2.5 text-center text-[11.5px] font-semibold ${
                   isDone
                     ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : "border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-400"
@@ -268,13 +268,13 @@ function SeoIntroSection() {
     >
       <h2
         id="home-seo-title"
-        className={`text-2xl font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-3xl ${colorTransitionClass}`}
+        className={`text-[26px] font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-[32px] ${colorTransitionClass}`}
       >
         Free Online Video Downloader
       </h2>
 
       <p
-        className={`mx-auto mt-4 max-w-[760px] text-[14.5px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 ${colorTransitionClass}`}
+        className={`mx-auto mt-4 max-w-[760px] text-[15.5px] leading-7 text-[var(--text-body)] sm:text-[17px] sm:leading-8 ${colorTransitionClass}`}
       >
         SnapDL lets you download videos from YouTube, Instagram, Facebook,
         Twitter/X, TikTok and more using one simple online tool. Paste a video
@@ -428,14 +428,20 @@ function HeroSection() {
         <meta name="robots" content="index, follow" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="SnapDL" />
-        <meta property="og:title" content="SnapDL - Free Online Video Downloader" />
+        <meta
+          property="og:title"
+          content="SnapDL - Free Online Video Downloader"
+        />
         <meta
           property="og:description"
           content="Save videos from YouTube, Instagram, Facebook, Twitter/X and more in MP4 or MP3 format with SnapDL."
         />
         <meta property="og:url" content="https://www.snapdl.tech/" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="SnapDL - Free Online Video Downloader" />
+        <meta
+          name="twitter:title"
+          content="SnapDL - Free Online Video Downloader"
+        />
         <meta
           name="twitter:description"
           content="Fast online video downloader for YouTube, Instagram, Facebook, Twitter/X and more."
@@ -460,7 +466,7 @@ function HeroSection() {
             <PillBadge>Fast, Secure, Unlimited</PillBadge>
 
             <h1
-              className={`mt-5 text-[42px] font-bold leading-[1.04] tracking-[-0.025em] text-[var(--text-heading)] xs:text-[46px] sm:text-[56px] md:text-[64px] lg:text-[60px] xl:text-[66px] ${colorTransitionClass}`}
+              className={`mt-5 text-[42px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--text-heading)] xs:text-[46px] sm:text-[56px] md:text-[64px] lg:text-[62px] xl:text-[70px] ${colorTransitionClass}`}
             >
               Download Videos
               <br />
@@ -472,7 +478,7 @@ function HeroSection() {
             </h1>
 
             <p
-              className={`mx-auto mt-5 max-w-[560px] text-[15px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 lg:mx-0 lg:text-[17px] ${colorTransitionClass}`}
+              className={`mx-auto mt-5 max-w-[590px] text-[16px] leading-7 text-[var(--text-body)] sm:text-[17px] sm:leading-8 lg:mx-0 lg:text-[19px] lg:leading-8 ${colorTransitionClass}`}
             >
               Save videos from YouTube, Instagram, Facebook, Twitter/X and
               1000+ websites in MP4 or MP3 format. Fast, free and easy to use.
@@ -504,7 +510,7 @@ function HeroSection() {
                     }
                   }}
                   placeholder="Paste your video link here..."
-                  className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
+                  className={`h-9 min-w-0 flex-1 bg-transparent text-[13.5px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
                 />
 
                 <button
@@ -512,7 +518,7 @@ function HeroSection() {
                   onClick={handlePaste}
                   disabled={isPreparing}
                   aria-label="Paste video link from clipboard"
-                  className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5"
+                  className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-[12.5px] font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-violet-400/35 hover:bg-violet-500/15 hover:text-violet-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5 sm:text-xs"
                 >
                   {isPasted ? (
                     <>
@@ -533,7 +539,7 @@ function HeroSection() {
               type="button"
               onClick={handleDownload}
               disabled={isPreparing}
-              className="mx-auto mt-4 inline-flex w-full max-w-[460px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 px-6 py-4 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(168,85,247,0.22)] transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:brightness-110 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 lg:mx-0"
+              className="mx-auto mt-4 inline-flex w-full max-w-[460px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 px-6 py-4 text-[15.5px] font-semibold text-white shadow-[0_10px_30px_rgba(168,85,247,0.22)] transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:brightness-110 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 sm:text-[16px] lg:mx-0"
             >
               {isPreparing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -545,7 +551,7 @@ function HeroSection() {
 
             <div className="mt-6">
               <p
-                className={`text-center text-xs font-medium text-[var(--text-soft)] lg:text-left ${colorTransitionClass}`}
+                className={`text-center text-[12.5px] font-medium text-[var(--text-soft)] lg:text-left ${colorTransitionClass}`}
               >
                 Supported Platforms
               </p>
@@ -554,7 +560,7 @@ function HeroSection() {
             </div>
 
             <div
-              className={`mx-auto mt-5 flex max-w-[520px] flex-wrap justify-center gap-x-4 gap-y-3 text-[11px] font-medium text-[var(--text-muted)] lg:mx-0 lg:justify-start ${colorTransitionClass}`}
+              className={`mx-auto mt-5 flex max-w-[520px] flex-wrap justify-center gap-x-4 gap-y-3 text-[11.5px] font-medium text-[var(--text-muted)] lg:mx-0 lg:justify-start ${colorTransitionClass}`}
             >
               {[
                 "100% Safe & Secure",

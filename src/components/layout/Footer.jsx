@@ -30,7 +30,7 @@ const legalColumnLinks = [
 ];
 
 const supportLinks = [
-  {label: "Contact Us", href: "/contact"},
+  { label: "Contact Us", href: "/contact" },
   { label: "Help Center", href: "/help" },
   { label: "Report Issue", href: "/report" },
   { label: "Feedback", href: "/feedback" },
@@ -305,18 +305,18 @@ function FooterColumn({ title, links, onSmartLinkClick }) {
   return (
     <div>
       <h3
-        className={`text-[13.5px] font-semibold tracking-[-0.01em] text-[var(--footer-heading)] sm:text-[14px] ${transitionClass}`}
+        className={`text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--footer-heading)] sm:text-[15.5px] lg:text-[16px] ${transitionClass}`}
       >
         {title}
       </h3>
 
-      <ul className="mt-3.5 space-y-2.5 sm:mt-4 sm:space-y-3">
+      <ul className="mt-4 space-y-3 sm:mt-5 sm:space-y-3.5">
         {links.map((link) => (
           <li key={link.label}>
             <a
               href={link.href}
               onClick={(event) => onSmartLinkClick(event, link.href)}
-              className={`inline-flex text-[12.5px] font-medium text-[var(--footer-link)] hover:translate-x-0.5 hover:text-[var(--footer-link-hover)] sm:text-[13px] ${transitionClass}`}
+              className={`inline-flex text-[14px] font-medium leading-6 text-[var(--footer-link)] hover:translate-x-0.5 hover:text-[var(--footer-link-hover)] sm:text-[14.5px] lg:text-[15px] ${transitionClass}`}
             >
               {link.label}
             </a>
@@ -415,7 +415,7 @@ function Footer() {
   return (
     <footer
       id="footer"
-      className={`theme-section relative overflow-hidden px-5 py-11 sm:px-8 sm:py-14 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
+      className={`theme-section relative overflow-hidden px-4 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
     >
       <div className={`theme-layer ${config.footerDark}`} />
       <div className={`theme-layer ${config.footerLight}`} />
@@ -431,8 +431,8 @@ function Footer() {
         <div
           className={`rounded-[30px] border border-[var(--footer-shell-border)] bg-[var(--footer-shell-bg)] p-5 shadow-[0_24px_80px_var(--footer-shell-shadow)] backdrop-blur-xl sm:p-6 lg:p-7 ${transitionClass}`}
         >
-          <div className="grid gap-9 lg:grid-cols-[1.25fr_2fr_1.2fr] lg:gap-10 xl:gap-12">
-            <div className="max-w-[380px]">
+          <div className="grid gap-10 lg:grid-cols-[1.25fr_2fr_1.2fr] lg:gap-10 xl:gap-12">
+            <div className="max-w-[390px]">
               <a
                 href="/"
                 onClick={(event) => handleSmartLinkClick(event, "/")}
@@ -443,7 +443,7 @@ function Footer() {
               </a>
 
               <p
-                className={`mt-5 max-w-[350px] text-[13px] leading-6 text-[var(--footer-muted)] sm:text-[14px] sm:leading-7 ${transitionClass}`}
+                className={`mt-5 max-w-[370px] text-[14px] leading-7 text-[var(--footer-muted)] sm:text-[14.5px] lg:text-[15px] ${transitionClass}`}
               >
                 {config.description}
               </p>
@@ -458,18 +458,18 @@ function Footer() {
                     }
                     aria-label={`Open ${social.label} downloader`}
                     title={`${social.label} Downloader`}
-                    className={`grid h-9 w-9 place-items-center rounded-xl border border-[var(--footer-social-border)] bg-[var(--footer-social-bg)] hover:-translate-y-0.5 ${config.hoverBorder} ${config.hoverBg} sm:h-10 sm:w-10 ${transitionClass}`}
+                    className={`grid h-10 w-10 place-items-center rounded-xl border border-[var(--footer-social-border)] bg-[var(--footer-social-bg)] hover:-translate-y-0.5 ${config.hoverBorder} ${config.hoverBg} sm:h-11 sm:w-11 ${transitionClass}`}
                   >
                     <BrandLogo
                       name={social.name}
-                      className="h-[18px] w-[18px] sm:h-5 sm:w-5"
+                      className="h-5 w-5 sm:h-[22px] sm:w-[22px]"
                     />
                   </a>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4 lg:gap-x-8 xl:gap-x-10">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-9 sm:grid-cols-4 lg:gap-x-8 xl:gap-x-10">
               {config.columns.map((column) => (
                 <FooterColumn
                   key={column.title}
@@ -480,15 +480,15 @@ function Footer() {
               ))}
             </div>
 
-            <div className="max-w-[380px] lg:ml-auto">
+            <div className="max-w-[390px] lg:ml-auto">
               <h3
-                className={`text-[13.5px] font-semibold tracking-[-0.01em] text-[var(--footer-heading)] sm:text-[14px] ${transitionClass}`}
+                className={`text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--footer-heading)] sm:text-[15.5px] lg:text-[16px] ${transitionClass}`}
               >
                 Stay Updated
               </h3>
 
               <p
-                className={`mt-3.5 max-w-[340px] text-[13px] leading-6 text-[var(--footer-muted)] sm:mt-4 sm:text-[14px] ${transitionClass}`}
+                className={`mt-4 max-w-[360px] text-[14px] leading-7 text-[var(--footer-muted)] sm:text-[14.5px] lg:text-[15px] ${transitionClass}`}
               >
                 Subscribe for SnapDL product updates, downloader improvements,
                 and useful video download tips.
@@ -496,14 +496,14 @@ function Footer() {
 
               <form
                 onSubmit={handleSubmit}
-                className={`mt-4 flex h-11 w-full max-w-[360px] overflow-hidden rounded-2xl border border-[var(--footer-input-border)] bg-[var(--footer-input-bg)] shadow-[0_12px_36px_var(--footer-input-shadow)] ${config.focusBorder} sm:mt-5 sm:h-12 ${transitionClass}`}
+                className={`mt-5 flex h-12 w-full max-w-[370px] overflow-hidden rounded-2xl border border-[var(--footer-input-border)] bg-[var(--footer-input-bg)] shadow-[0_12px_36px_var(--footer-input-shadow)] ${config.focusBorder} sm:h-[52px] ${transitionClass}`}
               >
                 <input
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   disabled={isSubmitting}
-                  className="min-w-0 flex-1 bg-transparent px-4 text-[13px] text-[var(--footer-input-text)] outline-none placeholder:text-[var(--footer-placeholder)] disabled:cursor-not-allowed sm:text-sm"
+                  className="min-w-0 flex-1 bg-transparent px-4 text-[14px] text-[var(--footer-input-text)] outline-none placeholder:text-[var(--footer-placeholder)] disabled:cursor-not-allowed sm:text-[14.5px]"
                   placeholder="Enter your email"
                   aria-label="Email address"
                 />
@@ -511,17 +511,17 @@ function Footer() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`grid w-12 shrink-0 place-items-center bg-gradient-to-r ${config.buttonGradient} ${
+                  className={`grid w-[52px] shrink-0 place-items-center bg-gradient-to-r ${config.buttonGradient} ${
                     isTwitter ? "text-slate-950" : "text-white"
-                  } hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70 sm:w-[52px] ${transitionClass}`}
+                  } hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70 sm:w-14 ${transitionClass}`}
                   aria-label="Subscribe"
                 >
-                  <Send className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                  <Send className="h-[18px] w-[18px]" />
                 </button>
               </form>
 
               <p
-                className={`mt-3 text-[12px] leading-5 text-[var(--footer-soft)] ${transitionClass}`}
+                className={`mt-3 text-[13px] leading-5 text-[var(--footer-soft)] sm:text-[13.5px] ${transitionClass}`}
               >
                 No spam. Only product updates and useful tips.
               </p>
@@ -531,12 +531,12 @@ function Footer() {
           <div className="mt-9 border-t border-[var(--footer-divider)] pt-5 sm:mt-10 lg:mt-12">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <p
-                className={`text-[12.5px] text-[var(--footer-muted)] sm:text-[13px] ${transitionClass}`}
+                className={`text-[13px] leading-5 text-[var(--footer-muted)] sm:text-[13.5px] ${transitionClass}`}
               >
                 &copy; 2026 SnapDL. All rights reserved.
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px] text-[var(--footer-soft)] sm:justify-end sm:gap-x-5 sm:text-[13px]">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] leading-5 text-[var(--footer-soft)] sm:justify-end sm:gap-x-5 sm:text-[13.5px]">
                 {legalLinks.map((item, index) => (
                   <div
                     key={item.label}
@@ -561,7 +561,7 @@ function Footer() {
             </div>
 
             <p
-              className={`mt-3 text-[12px] text-[var(--footer-soft)] sm:text-right ${transitionClass}`}
+              className={`mt-3 text-[13px] leading-5 text-[var(--footer-soft)] sm:text-right sm:text-[13.5px] ${transitionClass}`}
             >
               {config.madeFor}
             </p>

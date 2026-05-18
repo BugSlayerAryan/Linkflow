@@ -137,7 +137,10 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [theme, setTheme] = useState("dark");
 
-  const pageType = useMemo(() => getPageType(location.pathname), [location.pathname]);
+  const pageType = useMemo(
+    () => getPageType(location.pathname),
+    [location.pathname]
+  );
 
   const currentStyle = useMemo(() => {
     return platformStyles[pageType] || platformStyles.home;
@@ -226,7 +229,7 @@ function Navbar() {
 
       <nav
         aria-label="Main navigation"
-        className="relative z-10 mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:h-[76px] lg:px-14 xl:px-20 2xl:px-24"
+        className="relative z-10 mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-8 lg:h-[76px] lg:px-14 xl:px-20 2xl:px-24"
       >
         <Link
           to="/"
@@ -237,13 +240,13 @@ function Navbar() {
           <Logo />
         </Link>
 
-        <div className="hidden items-center gap-1 rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] p-1 shadow-[0_12px_36px_var(--shadow-soft)] backdrop-blur-xl lg:flex">
+        <div className="hidden items-center gap-1 rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] p-1 shadow-[0_12px_34px_var(--shadow-soft)] backdrop-blur-xl lg:flex">
           {currentStyle.links.map((link) => (
             <a
               key={link.label}
               href={link.href}
               onClick={(event) => handleNavClick(event, link.href)}
-              className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium text-[var(--nav-link-text)] hover:-translate-y-0.5 hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] ${currentStyle.hoverBorder} ${transitionClass}`}
+              className={`cursor-pointer rounded-full px-[18px] py-2.5 text-[14.5px] font-semibold leading-5 tracking-[-0.01em] text-[var(--nav-link-text)] hover:-translate-y-0.5 hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] xl:px-5 xl:text-[15px] ${currentStyle.hoverBorder} ${transitionClass}`}
             >
               {link.label}
             </a>
@@ -264,16 +267,16 @@ function Navbar() {
 
           <button
             type="button"
-            className={`cursor-pointer rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-5 py-3 text-sm font-medium text-[var(--nav-link-text)] hover:-translate-y-0.5 ${currentStyle.hoverBorder} hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] active:translate-y-0 ${transitionClass}`}
+            className={`cursor-pointer rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-5 py-3 text-[14.5px] font-semibold leading-5 tracking-[-0.01em] text-[var(--nav-link-text)] hover:-translate-y-0.5 ${currentStyle.hoverBorder} hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] active:translate-y-0 xl:text-[15px] ${transitionClass}`}
           >
             Log In
           </button>
 
           <button
             type="button"
-            className={`cursor-pointer rounded-2xl bg-gradient-to-r ${currentStyle.ctaGradient} px-5 py-3 text-sm font-semibold ${
+            className={`cursor-pointer rounded-2xl bg-gradient-to-r ${currentStyle.ctaGradient} px-5 py-3 text-[14.5px] font-semibold leading-5 tracking-[-0.01em] ${
               isTwitter ? "text-slate-950" : "text-white"
-            } ${currentStyle.ctaShadow} hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 ${transitionClass}`}
+            } ${currentStyle.ctaShadow} hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 xl:text-[15px] ${transitionClass}`}
           >
             Sign Up
           </button>
@@ -282,13 +285,13 @@ function Navbar() {
         <button
           type="button"
           onClick={() => setIsOpen((current) => !current)}
-          className={`grid h-10 w-10 cursor-pointer place-items-center rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] text-[var(--logo-title)] ${currentStyle.hoverBorder} hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] active:scale-95 lg:hidden ${transitionClass}`}
+          className={`grid h-11 w-11 cursor-pointer place-items-center rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] text-[var(--logo-title)] ${currentStyle.hoverBorder} hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] active:scale-95 lg:hidden ${transitionClass}`}
           aria-label={isOpen ? "Close mobile menu" : "Open mobile menu"}
           aria-expanded={isOpen}
           aria-controls="mobile-navigation"
         >
           {isOpen ? (
-            <X className="h-[18px] w-[18px]" />
+            <X className="h-5 w-5" />
           ) : (
             <Menu className="h-5 w-5" />
           )}
@@ -298,32 +301,32 @@ function Navbar() {
       <div
         id="mobile-navigation"
         className={`relative z-10 overflow-hidden backdrop-blur-2xl lg:hidden ${transitionClass} ${
-          isOpen ? "max-h-[720px] opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[760px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="px-5 pb-5 pt-3 sm:px-8">
+        <div className="px-4 pb-5 pt-3 sm:px-8">
           <div
-            className={`mx-auto max-w-sm rounded-[24px] border border-[var(--border-soft)] bg-[var(--surface-strong)] p-3 shadow-[0_24px_80px_var(--shadow-soft)] ${transitionClass}`}
+            className={`mx-auto max-w-sm rounded-[24px] border border-[var(--border-soft)] bg-[var(--surface-strong)] p-3 shadow-[0_24px_80px_var(--shadow-soft)] sm:max-w-md sm:p-4 ${transitionClass}`}
           >
             <div className="mb-3 flex items-center justify-between px-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-soft)]">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--text-soft)] sm:text-[12.5px]">
                 Navigation
               </p>
 
               <span
-                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${currentStyle.badgeClass}`}
+                className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold leading-none ${currentStyle.badgeClass}`}
               >
                 {currentStyle.badge}
               </span>
             </div>
 
-            <div className="grid gap-1">
+            <div className="grid gap-1.5">
               {currentStyle.links.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={(event) => handleNavClick(event, link.href)}
-                  className={`group relative flex cursor-pointer items-center justify-between rounded-2xl px-4 py-3 text-[14px] font-medium text-[var(--nav-link-text)] hover:translate-x-1 hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] ${transitionClass}`}
+                  className={`group relative flex cursor-pointer items-center justify-between rounded-2xl px-4 py-3.5 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--nav-link-text)] hover:translate-x-1 hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] sm:text-[15.5px] ${transitionClass}`}
                 >
                   <span
                     className={`absolute left-0 h-5 w-1 rounded-full bg-gradient-to-b ${currentStyle.sideLine} opacity-0 group-hover:opacity-100 ${transitionClass}`}
@@ -340,7 +343,7 @@ function Navbar() {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className={`mt-2 flex w-full items-center justify-between rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-[14px] font-medium text-[var(--nav-link-text)] hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] ${currentStyle.hoverBorder} ${transitionClass}`}
+                className={`mt-2 flex w-full items-center justify-between rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3.5 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--nav-link-text)] hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] sm:text-[15.5px] ${currentStyle.hoverBorder} ${transitionClass}`}
                 aria-label={
                   theme === "dark"
                     ? "Switch to light mode"
@@ -348,20 +351,20 @@ function Navbar() {
                 }
               >
                 <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-                <ThemeIcon className="h-[18px] w-[18px]" />
+                <ThemeIcon className="h-5 w-5" />
               </button>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  className={`rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3 text-[14px] font-medium text-[var(--nav-link-text)] hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] ${currentStyle.hoverBorder} ${transitionClass}`}
+                  className={`rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-4 py-3.5 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-[var(--nav-link-text)] hover:bg-[var(--nav-link-hover-bg)] hover:text-[var(--nav-link-hover-text)] sm:text-[15.5px] ${currentStyle.hoverBorder} ${transitionClass}`}
                 >
                   Log In
                 </button>
 
                 <button
                   type="button"
-                  className={`rounded-2xl bg-gradient-to-r ${currentStyle.ctaGradient} px-4 py-3 text-[14px] font-semibold ${
+                  className={`rounded-2xl bg-gradient-to-r ${currentStyle.ctaGradient} px-4 py-3.5 text-[15px] font-semibold leading-6 tracking-[-0.01em] sm:text-[15.5px] ${
                     isTwitter ? "text-slate-950" : "text-white"
                   } ${currentStyle.ctaShadow} hover:brightness-110 ${transitionClass}`}
                 >

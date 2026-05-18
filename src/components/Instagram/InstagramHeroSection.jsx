@@ -16,7 +16,7 @@ import {
 
 import PillBadge from "../common/PillBadge";
 import BrandLogo from "../common/BrandLogo";
-import HeroPreview from "../home/HeroPreview";
+import HeroPreview from "./InstagramHeroPreview";
 import { fetchMediaInfo } from "../../api/api";
 
 const colorTransitionClass =
@@ -216,7 +216,7 @@ function PreparingOverlay({ progress, loadingText }) {
               <Sparkles className="h-4 w-4 shrink-0 fill-pink-400 text-pink-400" />
             </div>
 
-            <p className="mt-1.5 text-[13.5px] leading-6 text-slate-600 dark:text-slate-300">
+            <p className="mt-1.5 text-[14px] leading-6 text-slate-600 dark:text-slate-300">
               Fetching Instagram preview, title, quality options, and download
               formats.
             </p>
@@ -247,7 +247,7 @@ function PreparingOverlay({ progress, loadingText }) {
             return (
               <div
                 key={step}
-                className={`rounded-2xl border px-3 py-2.5 text-center text-[11px] font-semibold ${
+                className={`rounded-2xl border px-3 py-2.5 text-center text-[11.5px] font-semibold ${
                   isDone
                     ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : "border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-400"
@@ -319,13 +319,13 @@ function SeoIntroSection() {
 
         <h2
           id="instagram-seo-title"
-          className={`mt-5 text-2xl font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-3xl ${colorTransitionClass}`}
+          className={`mt-5 text-[26px] font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-[32px] ${colorTransitionClass}`}
         >
           Free Instagram Video Downloader Online
         </h2>
 
         <p
-          className={`mx-auto mt-4 max-w-[760px] text-[14.5px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 ${colorTransitionClass}`}
+          className={`mx-auto mt-4 max-w-[760px] text-[15.5px] leading-7 text-[var(--text-body)] sm:text-[17px] sm:leading-8 ${colorTransitionClass}`}
         >
           SnapDL helps you download Instagram videos, Instagram Reels, stories,
           posts, and supported Instagram links in MP4 format. Paste your
@@ -563,12 +563,12 @@ function InstagramHeroSection() {
           <PreparingOverlay progress={progress} loadingText={loadingText} />
         )}
 
-        <div className="relative z-10 mx-auto grid max-w-[1440px] items-center gap-8 px-5 py-12 sm:px-8 sm:py-14 lg:min-h-[calc(100vh-72px)] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10 lg:px-14 lg:py-12 xl:gap-12 xl:px-20 2xl:px-24">
+        <div className="relative z-10 mx-auto grid max-w-[1440px] items-center gap-8 px-5 py-10 sm:px-8 sm:py-12 lg:min-h-[calc(100vh-72px)] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10 lg:px-14 lg:py-12 xl:gap-12 xl:px-20 2xl:px-24">
           <div className="relative z-10 mx-auto w-full max-w-[680px] text-center lg:mx-0 lg:text-left">
             <PillBadge>Instagram Video Downloader</PillBadge>
 
             <h1
-              className={`mx-auto mt-5 max-w-[640px] text-[39px] font-bold leading-[1.05] tracking-[-0.03em] text-[var(--text-heading)] xs:text-[43px] sm:text-[54px] md:text-[62px] lg:mx-0 lg:text-[60px] xl:text-[66px] ${colorTransitionClass}`}
+              className={`mx-auto mt-5 max-w-[640px] text-[42px] font-bold leading-[1.05] tracking-[-0.025em] text-[var(--text-heading)] xs:text-[46px] sm:text-[56px] md:text-[64px] lg:mx-0 lg:text-[62px] xl:text-[70px] ${colorTransitionClass}`}
             >
               <span className="whitespace-nowrap">Instagram Reels</span>
               <br />
@@ -580,7 +580,7 @@ function InstagramHeroSection() {
             </h1>
 
             <p
-              className={`mx-auto mt-5 max-w-[580px] text-[14.5px] leading-7 text-[var(--text-body)] sm:text-[16px] sm:leading-8 lg:mx-0 lg:text-[17px] ${colorTransitionClass}`}
+              className={`mx-auto mt-5 max-w-[590px] text-[16px] leading-7 text-[var(--text-body)] sm:text-[17px] sm:leading-8 lg:mx-0 lg:text-[19px] lg:leading-8 ${colorTransitionClass}`}
             >
               Download Instagram Reels, videos, stories, and post videos online
               in high-quality MP4. Paste your Instagram link, preview available
@@ -611,7 +611,7 @@ function InstagramHeroSection() {
                     if (event.key === "Enter") handleDownload();
                   }}
                   placeholder="Paste Instagram video link here."
-                  className={`h-9 min-w-0 flex-1 bg-transparent text-[13px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
+                  className={`h-9 min-w-0 flex-1 bg-transparent text-[13.5px] font-normal text-[var(--text-heading)] outline-none placeholder:text-[var(--input-placeholder)] disabled:cursor-not-allowed sm:text-sm ${colorTransitionClass}`}
                 />
 
                 <button
@@ -619,7 +619,7 @@ function InstagramHeroSection() {
                   onClick={handlePaste}
                   disabled={isPreparing}
                   aria-label="Paste Instagram video link from clipboard"
-                  className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-xs font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-pink-400/35 hover:bg-pink-500/15 hover:text-pink-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5"
+                  className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--input-border)] bg-[var(--input-button-bg)] px-3 text-[12.5px] font-semibold text-[var(--input-button-text)] shadow-inner shadow-white/5 transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-pink-400/35 hover:bg-pink-500/15 hover:text-pink-600 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-3.5 sm:text-xs"
                 >
                   {isPasted ? (
                     <>
@@ -640,7 +640,7 @@ function InstagramHeroSection() {
               type="button"
               onClick={handleDownload}
               disabled={isPreparing}
-              className="mx-auto mt-4 inline-flex w-full max-w-[460px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#FCAF45] px-6 py-4 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(225,48,108,0.30)] transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:brightness-110 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 lg:mx-0"
+              className="mx-auto mt-4 inline-flex w-full max-w-[460px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#FCAF45] px-6 py-4 text-[15.5px] font-semibold text-white shadow-[0_10px_30px_rgba(225,48,108,0.30)] transition-all duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:brightness-110 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 sm:text-[16px] lg:mx-0"
             >
               {isPreparing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -653,7 +653,7 @@ function InstagramHeroSection() {
 
             <div className="mt-6">
               <p
-                className={`text-center text-xs font-medium text-[var(--text-soft)] lg:text-left ${colorTransitionClass}`}
+                className={`text-center text-[12.5px] font-medium text-[var(--text-soft)] lg:text-left ${colorTransitionClass}`}
               >
                 More Video Downloaders
               </p>
@@ -662,7 +662,7 @@ function InstagramHeroSection() {
             </div>
 
             <div
-              className={`mx-auto mt-5 flex max-w-[560px] flex-wrap justify-center gap-x-4 gap-y-3 text-[11px] font-medium text-[var(--text-muted)] lg:mx-0 lg:justify-start ${colorTransitionClass}`}
+              className={`mx-auto mt-5 flex max-w-[560px] flex-wrap justify-center gap-x-4 gap-y-3 text-[11.5px] font-medium text-[var(--text-muted)] lg:mx-0 lg:justify-start ${colorTransitionClass}`}
             >
               {[
                 "Instagram Videos & Reels",

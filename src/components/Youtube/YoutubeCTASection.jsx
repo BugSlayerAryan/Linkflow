@@ -11,7 +11,7 @@ function YoutubeCTASection() {
     <section
       id="youtube-start-download"
       aria-labelledby="youtube-cta-title"
-      className={`platform-youtube theme-section relative overflow-hidden px-5 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-14 xl:px-20 ${transitionClass}`}
+      className={`platform-youtube theme-section relative overflow-hidden px-4 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
     >
       <div className="theme-layer theme-youtube-hero-dark" />
       <div className="theme-layer theme-youtube-hero-light" />
@@ -22,7 +22,9 @@ function YoutubeCTASection() {
         <div
           className={`relative overflow-hidden rounded-[30px] border border-red-500/25 bg-gradient-to-r from-red-700/80 via-red-600/75 to-rose-500/70 p-px shadow-[0_24px_90px_rgba(255,0,0,0.22)] ${transitionClass}`}
         >
-          <div className="relative overflow-hidden rounded-[29px] bg-[radial-gradient(circle_at_12%_45%,rgba(255,0,0,0.25),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(244,63,94,0.18),transparent_30%),linear-gradient(115deg,rgba(15,5,8,0.96),rgba(18,7,12,0.98)_52%,rgba(7,10,20,0.98))] px-5 py-6 sm:px-7 sm:py-7 lg:px-9 lg:py-8">
+          <div
+            className={`relative overflow-hidden rounded-[29px] bg-[radial-gradient(circle_at_12%_45%,rgba(255,0,0,0.25),transparent_34%),radial-gradient(circle_at_78%_18%,rgba(244,63,94,0.18),transparent_30%),linear-gradient(115deg,rgba(15,5,8,0.96),rgba(18,7,12,0.98)_52%,rgba(7,10,20,0.98))] px-5 py-6 sm:px-7 sm:py-7 lg:px-9 lg:py-8 ${transitionClass}`}
+          >
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.08)_42%,transparent_70%)]" />
             <div className="pointer-events-none absolute -left-16 top-1/2 h-52 w-52 -translate-y-1/2 rounded-full bg-red-400/12 blur-[85px]" />
             <div className="pointer-events-none absolute right-0 top-0 h-56 w-56 rounded-full bg-rose-400/14 blur-[90px]" />
@@ -42,13 +44,15 @@ function YoutubeCTASection() {
               </div>
 
               <div className="text-center lg:text-left">
-                <p className="mb-2 inline-flex rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-[11px] font-semibold text-red-200">
+                <p
+                  className={`mb-3 inline-flex rounded-full border border-red-400/20 bg-red-500/10 px-3 py-1.5 text-[11px] font-medium text-red-200 sm:mb-4 sm:px-3.5 sm:text-xs ${transitionClass}`}
+                >
                   YouTube Video Downloader
                 </p>
 
                 <h2
                   id="youtube-cta-title"
-                  className="text-[28px] font-semibold leading-tight tracking-[-0.03em] text-white sm:text-[34px] lg:text-[40px]"
+                  className={`mx-auto max-w-[560px] text-[28px] font-semibold leading-[1.12] tracking-[-0.02em] text-white min-[420px]:text-[30px] sm:text-[36px] lg:mx-0 lg:text-[42px] ${transitionClass}`}
                 >
                   YouTube Video{" "}
                   <span className="bg-gradient-to-r from-[#FF0000] via-red-400 to-rose-300 bg-clip-text text-transparent">
@@ -56,7 +60,9 @@ function YoutubeCTASection() {
                   </span>
                 </h2>
 
-                <p className="mx-auto mt-3 max-w-[660px] text-[14px] leading-6 text-white/82 sm:text-[15px] sm:leading-7 lg:mx-0">
+                <p
+                  className={`mx-auto mt-4 max-w-[580px] text-[13.5px] leading-7 text-white/82 sm:mt-5 sm:text-[15px] sm:leading-8 lg:mx-0 ${transitionClass}`}
+                >
                   Paste a YouTube video, Shorts, or music link and download
                   supported MP4 or MP3 formats online with SnapDL.
                 </p>
@@ -66,17 +72,21 @@ function YoutubeCTASection() {
                 <a
                   href="#hero"
                   aria-label="Start downloading YouTube videos with SnapDL"
-                  className={`group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF0000] via-red-600 to-rose-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(255,0,0,0.28)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 sm:w-auto sm:min-w-[250px] ${transitionClass}`}
+                  className={`group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF0000] via-red-600 to-rose-500 px-6 py-3 text-[13.5px] font-semibold text-white shadow-[0_16px_40px_rgba(255,0,0,0.28)] hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 sm:w-auto sm:min-w-[250px] sm:text-[14px] ${transitionClass}`}
                 >
                   <Download className="h-4 w-4 transition-transform duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0.5" />
                   Download YouTube Video
                 </a>
 
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12.5px] font-semibold text-white/88 lg:justify-end">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11.5px] font-medium text-white/88 sm:text-[12.5px] lg:justify-end">
                   {benefits.map((item, index) => (
-                    <span key={item} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                    <span
+                      key={item}
+                      className="inline-flex items-center gap-1.5 whitespace-nowrap"
+                    >
                       <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-red-300" />
                       {item}
+
                       {index !== benefits.length - 1 && (
                         <span className="ml-2 hidden h-4 w-px bg-white/20 opacity-70 md:inline-block" />
                       )}

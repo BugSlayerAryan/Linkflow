@@ -54,7 +54,7 @@ function FAQSection() {
     <section
       id="faq"
       aria-labelledby="faq-title"
-      className={`theme-section relative overflow-hidden px-5 py-11 sm:px-8 sm:py-14 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
+      className={`theme-section relative overflow-hidden px-4 py-10 sm:px-8 sm:py-12 lg:px-14 lg:py-16 xl:px-20 ${transitionClass}`}
     >
       <div className="theme-layer theme-faq-dark" />
       <div className="theme-layer theme-faq-light" />
@@ -62,10 +62,16 @@ function FAQSection() {
       <div className="pointer-events-none absolute left-1/2 top-8 z-[1] h-44 w-[320px] -translate-x-1/2 rounded-full bg-violet-500/15 blur-[80px] sm:h-52 sm:w-[560px] sm:blur-[95px]" />
 
       <div className="relative z-10 mx-auto max-w-[1320px]">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-[920px] text-center">
+          <div
+            className={`mx-auto mb-3 inline-flex rounded-full border border-[var(--badge-border)] bg-[var(--badge-bg)] px-3 py-1.5 text-[11px] font-medium text-[var(--badge-text)] sm:mb-4 sm:px-3.5 sm:text-xs ${transitionClass}`}
+          >
+            Help Center
+          </div>
+
           <h2
             id="faq-title"
-            className={`text-[28px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-heading)] sm:text-[34px] lg:text-[36px] ${transitionClass}`}
+            className={`mx-auto max-w-[920px] text-[28px] font-semibold leading-[1.12] tracking-[-0.02em] text-[var(--text-heading)] min-[420px]:text-[30px] sm:text-[36px] lg:whitespace-nowrap lg:text-[42px] ${transitionClass}`}
           >
             Online Video Downloader{" "}
             <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent">
@@ -74,7 +80,7 @@ function FAQSection() {
           </h2>
 
           <p
-            className={`mx-auto mt-3 max-w-xl text-[14px] leading-6 text-[var(--text-muted)] sm:text-[15px] ${transitionClass}`}
+            className={`mx-auto mt-4 max-w-[620px] text-[13.5px] leading-7 text-[var(--text-muted)] sm:mt-5 sm:text-[15px] sm:leading-8 ${transitionClass}`}
           >
             Find answers about downloading videos online, supported platforms,
             MP4/MP3 formats, safety, and browser compatibility.
@@ -82,9 +88,9 @@ function FAQSection() {
         </div>
 
         <div
-          className={`mx-auto mt-8 grid max-w-[720px] gap-4 rounded-[24px] border border-[var(--faq-shell-border)] bg-[var(--faq-shell-bg)] p-3 shadow-[0_20px_65px_var(--faq-shell-shadow)] backdrop-blur-xl sm:mt-10 sm:p-4 lg:max-w-none lg:grid-cols-[1.05fr_0.95fr] lg:gap-5 lg:rounded-[28px] lg:p-5 ${transitionClass}`}
+          className={`mx-auto mt-8 grid max-w-[760px] gap-4 rounded-[24px] border border-[var(--faq-shell-border)] bg-[var(--faq-shell-bg)] p-3 shadow-[0_20px_65px_var(--faq-shell-shadow)] backdrop-blur-xl sm:mt-10 sm:p-4 lg:max-w-none lg:grid-cols-[1.05fr_0.95fr] lg:gap-5 lg:rounded-[28px] lg:p-5 ${transitionClass}`}
         >
-          <div className="space-y-2.5 sm:space-y-3">
+          <div className="space-y-3">
             {faqs.map((faq, index) => {
               const isOpen = openIndex === index;
               const answerId = `faq-answer-${index}`;
@@ -104,12 +110,12 @@ function FAQSection() {
                       id={buttonId}
                       type="button"
                       onClick={() => handleToggle(index)}
-                      className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left sm:gap-4 sm:px-4"
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left sm:gap-4 sm:px-5 sm:py-4"
                       aria-expanded={isOpen}
                       aria-controls={answerId}
                     >
                       <span
-                        className={`text-[13.5px] font-medium leading-6 sm:text-[14px] ${transitionClass} ${
+                        className={`text-[15px] font-semibold leading-6 tracking-[-0.01em] sm:text-[15.5px] lg:text-[16px] ${transitionClass} ${
                           isOpen
                             ? "text-[var(--text-heading)]"
                             : "text-[var(--faq-question-text)]"
@@ -119,7 +125,7 @@ function FAQSection() {
                       </span>
 
                       <span
-                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg sm:h-8 sm:w-8 ${transitionClass} ${
+                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg sm:h-9 sm:w-9 ${transitionClass} ${
                           isOpen
                             ? "bg-violet-500/10 text-violet-400"
                             : "bg-[var(--faq-chevron-bg)] text-[var(--text-soft)]"
@@ -146,7 +152,7 @@ function FAQSection() {
                   >
                     <div className="overflow-hidden">
                       <p
-                        className={`px-3.5 pb-3 pr-10 text-[12.8px] leading-6 text-[var(--text-muted)] sm:px-4 sm:pr-12 sm:text-[13px] ${transitionClass}`}
+                        className={`px-4 pb-4 pr-12 text-[14px] leading-7 text-[var(--text-muted)] sm:px-5 sm:pb-5 sm:pr-14 sm:text-[14.5px] lg:text-[15px] ${transitionClass}`}
                       >
                         {faq.answer}
                       </p>
@@ -165,19 +171,19 @@ function FAQSection() {
             <div className="relative grid gap-6 lg:h-full lg:grid-cols-[1fr_150px] lg:items-center xl:grid-cols-[1fr_170px]">
               <div>
                 <div
-                  className={`mb-4 grid h-11 w-11 place-items-center rounded-2xl border border-[var(--faq-icon-border)] bg-[var(--faq-icon-bg)] text-[var(--faq-icon-color)] shadow-[0_0_28px_rgba(139,92,246,0.2)] sm:mb-5 sm:h-12 sm:w-12 ${transitionClass}`}
+                  className={`mb-4 grid h-10 w-10 place-items-center rounded-2xl border border-[var(--faq-icon-border)] bg-[var(--faq-icon-bg)] text-[var(--faq-icon-color)] shadow-[0_0_28px_rgba(139,92,246,0.2)] sm:mb-5 sm:h-11 sm:w-11 ${transitionClass}`}
                 >
-                  <ShieldCheck className="h-6 w-6 stroke-[1.8] sm:h-7 sm:w-7" />
+                  <ShieldCheck className="h-5 w-5 stroke-[1.8] sm:h-6 sm:w-6" />
                 </div>
 
                 <h3
-                  className={`text-[18px] font-semibold tracking-[-0.015em] text-[var(--text-heading)] sm:text-[20px] ${transitionClass}`}
+                  className={`text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-heading)] sm:text-[20px] ${transitionClass}`}
                 >
                   Safe Browser-Based Downloads
                 </h3>
 
                 <p
-                  className={`mt-3 max-w-md text-[13.5px] leading-7 text-[var(--text-muted)] sm:text-[14px] ${transitionClass}`}
+                  className={`mt-3 max-w-md text-[14px] leading-7 text-[var(--text-muted)] sm:text-[15px] ${transitionClass}`}
                 >
                   SnapDL keeps the download flow simple and secure. You do not
                   need to create an account or install unknown third-party apps
@@ -192,7 +198,7 @@ function FAQSection() {
                   ].map((item) => (
                     <p
                       key={item}
-                      className={`flex items-center gap-2.5 text-[13.5px] font-medium text-[var(--faq-check-text)] sm:text-[14px] ${transitionClass}`}
+                      className={`flex items-center gap-2.5 text-[14px] font-medium text-[var(--faq-check-text)] sm:text-[14.5px] ${transitionClass}`}
                     >
                       <BadgeCheck className="h-[17px] w-[17px] shrink-0 text-emerald-400 sm:h-[18px] sm:w-[18px]" />
                       {item}

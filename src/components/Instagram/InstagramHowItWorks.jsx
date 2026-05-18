@@ -21,12 +21,12 @@ const instagramSteps = [
   },
   {
     title: "Preview MP4 Format",
-    text: "SnapDL checks the Instagram URL and shows available video download options.",
+    text: "Check available Instagram Reels and video download options.",
     icon: Search,
   },
   {
     title: "Download Instagram Video",
-    text: "Choose the available MP4 format and save your Instagram video on any device.",
+    text: "Choose the available MP4 format and save your video securely.",
     icon: Download,
   },
 ];
@@ -34,7 +34,7 @@ const instagramSteps = [
 const instagramStepLabels = [
   "Paste a public Instagram URL",
   "Preview Instagram MP4 formats",
-  "Download Reels or videos securely",
+  "Download safely on any device",
 ];
 
 function InstagramHowItWorks() {
@@ -52,9 +52,9 @@ function InstagramHowItWorks() {
       <div className="pointer-events-none absolute -right-32 top-32 z-[1] h-72 w-72 rounded-full bg-[#FCAF45]/10 blur-[120px]" />
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-5 py-12 sm:px-8 sm:py-16 lg:px-14 lg:py-20 xl:px-20">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-[860px] text-center">
           <div
-            className={`mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-pink-400/20 bg-pink-500/10 px-4 py-2 text-[12px] font-semibold text-pink-400 shadow-[0_14px_40px_var(--shadow-soft)] backdrop-blur-xl ${smoothTransitionClass}`}
+            className={`mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-pink-400/20 bg-pink-500/10 px-4 py-2 text-[12.5px] font-semibold text-pink-400 shadow-[0_14px_40px_var(--shadow-soft)] backdrop-blur-xl ${smoothTransitionClass}`}
           >
             <Sparkles className="h-3.5 w-3.5 fill-pink-400 text-pink-400" />
             Simple Instagram download steps
@@ -62,20 +62,20 @@ function InstagramHowItWorks() {
 
           <h2
             id="instagram-how-it-works-title"
-            className={`text-[30px] font-bold leading-tight tracking-[-0.04em] text-[var(--text-heading)] sm:text-[40px] lg:text-[46px] ${colorTransitionClass}`}
+            className={`text-[32px] font-bold leading-[1.12] tracking-[-0.04em] text-[var(--text-heading)] sm:text-[42px] lg:text-[48px] ${colorTransitionClass}`}
           >
-            Download Reels{" "}
+            Download Instagram Reels{" "}
             <span className="bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#FCAF45] bg-clip-text text-transparent">
               In MP4
             </span>
           </h2>
 
           <p
-            className={`mx-auto mt-4 max-w-2xl text-[14px] leading-7 text-[var(--text-muted)] sm:text-[16px] ${colorTransitionClass}`}
+            className={`mx-auto mt-4 max-w-[780px] text-[15.5px] leading-7 text-[var(--text-muted)] sm:text-[17px] sm:leading-8 lg:text-[18px] ${colorTransitionClass}`}
           >
             Download Instagram Reels, videos, stories, and post videos online in
-            MP4 format. Paste your Instagram URL, preview formats, and save the
-            video quickly.
+            MP4 format. Paste your Instagram URL, preview available formats, and
+            save your video in seconds.
           </p>
         </div>
 
@@ -117,13 +117,13 @@ function InstagramHowItWorks() {
                     </div>
 
                     <h3
-                      className={`text-[18px] font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-[20px] ${colorTransitionClass}`}
+                      className={`text-[19px] font-bold tracking-[-0.02em] text-[var(--text-heading)] sm:text-[21px] ${colorTransitionClass}`}
                     >
                       {step.title}
                     </h3>
 
                     <p
-                      className={`mt-3 min-h-[52px] text-[13.5px] leading-6 text-[var(--text-muted)] sm:text-[14px] ${colorTransitionClass}`}
+                      className={`mt-3 min-h-[56px] text-[14px] leading-6 text-[var(--text-muted)] sm:text-[15px] sm:leading-7 ${colorTransitionClass}`}
                     >
                       {step.text}
                     </p>
@@ -134,7 +134,7 @@ function InstagramHowItWorks() {
                       <div className="flex items-start gap-2.5">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
 
-                        <p className="text-[12.5px] font-semibold leading-5 text-[var(--text-heading)]">
+                        <p className="text-[13px] font-semibold leading-5 text-[var(--text-heading)]">
                           {instagramStepLabels[index]}
                         </p>
                       </div>

@@ -15,33 +15,33 @@ const smoothTransitionClass =
 
 const instagramFeatures = [
   {
-    title: "Instagram Reels",
-    text: "Download public Instagram Reels online in MP4 format.",
+    title: "Instagram Reels Download",
+    text: "Download Instagram Reels online in MP4 format.",
     icon: MonitorDown,
   },
   {
-    title: "Video Posts",
-    text: "Save Instagram video posts from supported public links.",
+    title: "Instagram Video Posts",
+    text: "Save Instagram video posts from public links.",
     icon: Download,
   },
   {
-    title: "Stories Support",
-    text: "Download accessible Instagram story videos when available.",
+    title: "Instagram Stories",
+    text: "Download available Instagram story videos online.",
     icon: ImageDown,
   },
   {
-    title: "Fast Preview",
-    text: "Paste an Instagram link and preview formats quickly.",
+    title: "Fast Video Preview",
+    text: "Preview Instagram video download formats quickly.",
     icon: Zap,
   },
   {
-    title: "No App Install",
-    text: "Use the Instagram downloader directly inside your browser.",
+    title: "No App Required",
+    text: "Use the Instagram downloader online without installation.",
     icon: BadgeCheck,
   },
   {
-    title: "Private & Secure",
-    text: "Simple browser-based downloading with a clean user flow.",
+    title: "Secure Downloads",
+    text: "Safe and private browser-based Instagram downloading.",
     icon: ShieldCheck,
   },
 ];
